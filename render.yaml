@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: etsy-keyword-tool
+    runtime: node
+    plan: free
+    buildCommand: ""
+    startCommand: node server.js
+    envVars:
+      - key: ETSY_API_KEY
+        sync: false
+      - key: SEMRUSH_API_KEY
+        sync: false
+      - key: APP_PASSWORD
+        sync: false

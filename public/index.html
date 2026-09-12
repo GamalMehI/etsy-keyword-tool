@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Etsy Keyword Tool</title>
+<style>
+  :root{--bg:#f6f5f1;--card:#fff;--ink:#1e2a22;--muted:#6b756f;--line:#e6e3dc;--green:#1f7a4d;--green-bg:#e3f2e9;--amber:#b7791f;--amber-bg:#fbf0d9;--red:#b3362d;--red-bg:#f9e3e0;--accent:#1f7a4d}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,sans-serif}
+  header{padding:22px 28px 10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  h1{font-size:20px;margin:0;letter-spacing:-.01em}
+  .status{font-size:12px;color:var(--muted);display:flex;gap:8px}
+  .pill{padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:var(--card)}
+  .pill.on{border-color:var(--green);color:var(--green)}
+  .pill.off{border-color:var(--red);color:var(--red)}
+  main{padding:0 28px 60px;max-width:1400px}
+  form{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0 18px}
+  input[type=text]{flex:1;min-width:280px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:var(--card)}
+  button{padding:11px 16px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+  button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:500;padding:6px 10px;font-size:12px}
+  label.chk{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .card .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .card .v{font-size:22px;font-weight:700;margin-top:4px}
+  .card .s{font-size:12px;color:var(--muted)}
+  .badge{display:inline-block;padding:4px 10px;border-radius:8px;font-weight:600;font-size:13px}
+  .g{background:var(--green-bg);color:var(--green)} .a{background:var(--amber-bg);color:var(--amber)} .r{background:var(--red-bg);color:var(--red)} .n{background:#ecebe6;color:var(--muted)}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px}
+  section h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:8px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:hover td{background:#faf9f6}
+  .kw{font-weight:600;color:var(--green)}
+  .src{font-size:11px;color:var(--muted)}
+  svg.spark{width:90px;height:26px;display:block}
+  .tagbad{color:var(--red);font-size:11px}
+  .muted{color:var(--muted)}
+  .note{font-size:12px;color:var(--muted);margin:6px 0 0}
+  .star{cursor:pointer;color:#c9c5bb;font-size:16px} .star.on{color:#e0a800}
+  .wrap{overflow-x:auto}
+  .err{background:var(--red-bg);color:var(--red);padding:10px 12px;border-radius:10px;margin-bottom:12px;font-size:13px}
+  .toolbar{display:flex;gap:8px;align-items:center}
+  .tabs{display:flex;gap:6px;margin:6px 0 4px}
+  .tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600;font-size:13px}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  input[type=number]{width:70px;padding:10px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+  .log{font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--muted);max-height:140px;overflow:auto;background:#faf9f6;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:12px;white-space:pre-wrap}
+  .bar{height:6px;background:#ecebe6;border-radius:4px;overflow:hidden;margin-bottom:10px}
+  .bar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+  tr.detail td{background:#faf9f6;padding:12px 16px}
+  .mini{width:100%;font-size:12px} .mini td,.mini th{padding:5px 6px}
+  .complaint{font-size:12px;color:var(--muted);font-style:italic;margin:2px 0}
+  .W{background:var(--green-bg);color:var(--green)} .N{background:var(--amber-bg);color:var(--amber)} .K{background:#ecebe6;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Etsy Keyword Tool</h1>
+  <div class="status" id="status"></div>
+</header>
+<main>
+  <div class="tabs"><span class="tab on" data-tab="kw">Keyword</span><span class="tab" data-tab="niche">Niche finder</span></div>
+  <div id="pane-niche" hidden>
+    <form id="nf">
+      <input type="text" id="nq" placeholder="Root keyword, e.g. crochet pattern, svg bundle, nurse sweatshirt">
+      <label class="chk">sub keywords <input type="number" id="nn" value="12" min="3" max="40"></label>
+      <label class="chk">listings to validate <input type="number" id="ntop" value="5" min="2" max="10"></label>
+      <label class="chk"><input type="checkbox" id="ndeep"> deep expand</label>
+      <button type="submit" id="ngo">Find niches</button>
+    </form>
+    <div id="nerr"></div>
+    <div class="bar" id="nbar" hidden><i></i></div>
+    <div class="log" id="nlog" hidden></div>
+    <section id="niches" hidden>
+      <h2>Niches ranked <span class="toolbar"><span class="muted" id="ncount"></span><button class="ghost" id="ncsv">Export CSV</button></span></h2>
+      <div class="wrap"><table id="ntbl"></table></div>
+      <p class="note">Score out of 17: demand velocity (reviews in last 30 days on the top listings), open door (page-1 shops under a year old or under 500 sales), price room, quality gap (share of 1 to 3 star reviews in the last 90 days), Google volume bonus. WINNER needs 10+, demand 2+, open door 2+. Estimated sales assume about 1 review per 10 sales. Click a row to see its products and complaints.</p>
+    </section>
+    <section id="products" hidden>
+      <h2>Winning products across all niches <span class="muted">by estimated monthly revenue</span></h2>
+      <div class="wrap"><table id="ptbl"></table></div>
+    </section>
+  </div>
+  <div id="pane-kw">
+  <form id="f">
+    <input type="text" id="q" placeholder="Enter a keyword, e.g. crochet cardigan pattern" autofocus>
+    <label class="chk"><input type="checkbox" id="deep"> deep expand (a to z, slower)</label>
+    <label class="chk"><input type="checkbox" id="shops" checked> check shop ages and sales</label>
+    <button type="submit" id="go">Analyze</button>
+  </form>
+  <div id="err"></div>
+  <div id="cards" class="cards"></div>
+  <section id="top" hidden><h2>Top Etsy listings for this keyword <span class="muted" id="topnote"></span></h2><div class="wrap"><table id="toptbl"></table></div></section>
+  <section id="sub" hidden>
+    <h2>Sub keywords <span class="toolbar"><span class="muted" id="subcount"></span><button class="ghost" id="analyzeAll">Analyze top 10 on Etsy</button><button class="ghost" id="csv">Export CSV</button><button class="ghost" id="showSaved">Saved (<span id="savedN">0</span>)</button></span></h2>
+    <div class="wrap"><table id="subtbl"></table></div>
+    <p class="note">Volume, trend and KD are Google data from Semrush. Competition and difficulty are from the Etsy Open API. Clicks and CTR are not available from any public source and are not shown. Tags must be 20 characters or fewer.</p>
+  </section>
+  </div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const fmt=n=>n==null?'–':(typeof n==='number'?n.toLocaleString():n);
+const money=n=>n==null?'–':'$'+n.toFixed(2);
+let saved=JSON.parse(localStorage.getItem('saved')||'[]');
+let subRows=[]; let sortKey='volume', sortDir=-1;
+
+fetch('/api/status').then(r=>r.json()).then(s=>{
+  $('#status').innerHTML=`<span class="pill ${s.mock?'off':s.etsy?'on':'off'}">Etsy API ${s.mock?'MOCK DATA':s.etsy?'on':'off'}</span><span class="pill ${s.semrush?'on':'off'}">Semrush ${s.semrush?'on':'off'}</span><span class="pill">Google suggest on</span>`;
+});
+function spark(arr){
+  if(!arr||!arr.length) return '<span class="muted">–</span>';
+  const max=Math.max(...arr,0.0001), w=90,h=26,bw=w/arr.length-1;
+  const bars=arr.map((v,i)=>`<rect x="${i*(bw+1)}" y="${h-(v/max)*h}" width="${bw}" height="${(v/max)*h}" fill="${i===arr.length-1?'#1f7a4d':'#c9c5bb'}"/>`).join('');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}">${bars}</svg>`;
+}
+function kdBadge(kd){ if(kd==null) return '<span class="badge n">–</span>'; const c=kd<40?'g':kd<70?'a':'r'; return `<span class="badge ${c}">${kd}</span>`; }
+function compBadge(c){ if(c==null) return '<span class="badge n">–</span>'; const k=c<5000?'g':c<30000?'a':'r'; return `<span class="badge ${k}">${fmt(c)}</span>`; }
+function volBadge(v){ if(v==null) return '<span class="badge n">–</span>'; const k=v>=1000?'g':v>=100?'a':'n'; return `<span class="badge ${k}">${fmt(v)}</span>`; }
+function verdictBadge(v){ const k=/strong|open/.test(v)?'g':/possible/.test(v)?'a':/weak|crowded/.test(v)?'r':'n'; return `<span class="badge ${k}">${v}</span>`; }
+
+async function analyze(q){
+  $('#err').innerHTML=''; $('#go').disabled=true; $('#go').textContent='Working…';
+  $('#cards').innerHTML='<div class="card"><div class="k">Status</div><div class="v" style="font-size:14px">Fetching Etsy, Semrush and Google…</div></div>';
+  try{
+    const shops=$('#shops').checked?'1':'0';
+    const [k,s]=await Promise.all([
+      fetch(`/api/keyword?q=${encodeURIComponent(q)}&shops=${shops}`).then(r=>r.json()),
+      fetch(`/api/suggest?q=${encodeURIComponent(q)}&deep=${$('#deep').checked?1:0}`).then(r=>r.json())
+    ]);
+    renderMain(k); subRows=s.rows; renderSub();
+  }catch(e){ $('#err').innerHTML=`<div class="err">${e.message}</div>`; }
+  $('#go').disabled=false; $('#go').textContent='Analyze';
+}
+function renderMain(k){
+  const sr=k.semrush||{}, et=(k.etsy&&!k.etsy.error)?k.etsy:null, sc=k.score||{};
+  if(k.etsy&&k.etsy.error) $('#err').innerHTML=`<div class="err">Etsy API: ${k.etsy.error}</div>`;
+  const cards=[
+    ['Keyword',`<span style="font-size:16px">${k.keyword}</span>`,k.tag_ok?'fits a 20-char tag':'<span class="tagbad">too long for a tag (20 max)</span>'],
+    ['Google searches / mo',volBadge(sr.volume),'Semrush, '+(sr.volume==null?'no key or no data':'US')],
+    ['12-month trend',spark(sr.trend),sr.trend?`latest ${fmt(sr.trend[11])}`:'needs Semrush'],
+    ['Google KD',kdBadge(sr.kd),'Semrush keyword difficulty'],
+    ['Etsy competition',compBadge(et?et.competition:null),et?`${fmt(et.distinct_shops)} shops in top ${et.sampled}`:'needs Etsy key'],
+    ['Etsy difficulty',kdBadge(sc.difficulty),'competition + incumbency'],
+    ['Opportunity',sc.opportunity!=null?`<span class="badge ${sc.opportunity>=65?'g':sc.opportunity>=45?'a':'r'}">${sc.opportunity}</span>`:'<span class="badge n">–</span>',verdictBadge(sc.verdict||'no data')],
+    ['Price low / median / high',et?`<span style="font-size:15px">${money(et.price_low)} / ${money(et.price_median)} / ${money(et.price_high)}</span>`:'–','top 100 listings'],
+    ['Digital share',et&&et.digital_share!=null?et.digital_share+'%':'–','downloads among top 100'],
+    ['New listings (90 days)',et?fmt(et.new_listings_90d):'–',et?`median age ${fmt(et.median_listing_age_days)} days`:''],
+    ['Open door',et&&et.shops_checked?`${et.young_shops} young / ${et.small_shops} small`:'–',et&&et.shops_checked?`of ${et.shops_checked} shops checked, ${et.big_shops} big (5k+ sales)`:'enable shop check'],
+    ['Median favorites',et?fmt(et.median_favorites):'–','top 100 listings'],
+  ];
+  $('#cards').innerHTML=cards.map(([kk,v,s])=>`<div class="card"><div class="k">${kk}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`).join('');
+  if(et&&et.top&&et.top.length){
+    $('#top').hidden=false; $('#topnote').textContent='sorted by Etsy relevance';
+    $('#toptbl').innerHTML=`<tr><th>Title</th><th>Price</th><th>Favorites</th><th>Age (days)</th><th>Type</th><th>Shop</th><th>Shop sales</th></tr>`+
+      et.top.map(t=>`<tr><td><a href="${t.url}" target="_blank" rel="noopener" class="kw">${t.title}</a></td><td>${money(t.price)}</td><td>${fmt(t.favorites)}</td><td>${fmt(t.age_days)}</td><td class="src">${t.type||'–'}</td><td>${t.shop||'–'}</td><td>${fmt(t.shop_sales)}</td></tr>`).join('');
+  } else $('#top').hidden=true;
+}
+function renderSub(){
+  $('#sub').hidden=false; $('#subcount').textContent=subRows.length+' found';
+  const rows=[...subRows].sort((a,b)=>{const x=a[sortKey],y=b[sortKey]; if(x==null&&y==null)return 0; if(x==null)return 1; if(y==null)return -1; return (x>y?1:x<y?-1:0)*sortDir;});
+  const th=(k,l)=>`<th data-k="${k}">${l}${sortKey===k?(sortDir<0?' ↓':' ↑'):''}</th>`;
+  $('#subtbl').innerHTML=`<tr><th></th>${th('keyword','Keyword')}<th>Trend</th>${th('volume','Google vol')}${th('kd','KD')}${th('competition','Etsy comp.')}${th('difficulty','Etsy diff.')}${th('opportunity','Opp.')}<th>Tag</th><th></th></tr>`+
+    rows.map(r=>`<tr data-kw="${r.keyword}"><td><span class="star ${saved.includes(r.keyword)?'on':''}" data-kw="${r.keyword}">★</span></td><td><span class="kw">${r.keyword}</span><div class="src">${r.source}</div></td><td>${spark(r.trend)}</td><td>${volBadge(r.volume)}</td><td>${kdBadge(r.kd)}</td><td class="c-comp">${compBadge(r.competition)}</td><td class="c-diff">${kdBadge(r.difficulty)}</td><td class="c-opp">${r.opportunity!=null?`<span class="badge ${r.opportunity>=65?'g':r.opportunity>=45?'a':'r'}">${r.opportunity}</span>`:'<span class="badge n">–</span>'}</td><td>${r.keyword.length<=20?'<span class="muted">ok</span>':'<span class="tagbad">'+r.keyword.length+' chars</span>'}</td><td><button class="ghost an" data-kw="${r.keyword}">Etsy check</button> <button class="ghost dig" data-kw="${r.keyword}">Dig</button></td></tr>`).join('');
+  $('#savedN').textContent=saved.length;
+}
+async function etsyCheck(kw){
+  const row=subRows.find(r=>r.keyword===kw); if(!row) return;
+  const k=await fetch(`/api/keyword?q=${encodeURIComponent(kw)}&shops=0`).then(r=>r.json());
+  const et=(k.etsy&&!k.etsy.error)?k.etsy:null;
+  row.competition=et?et.competition:null; row.difficulty=k.score?k.score.difficulty:null; row.opportunity=k.score?k.score.opportunity:null;
+  if(row.volume==null&&k.semrush){ row.volume=k.semrush.volume; row.kd=k.semrush.kd; row.trend=k.semrush.trend; }
+  renderSub();
+}
+$('#f').addEventListener('submit',e=>{e.preventDefault(); const q=$('#q').value.trim(); if(q) analyze(q);});
+$('#subtbl').addEventListener('click',async e=>{
+  const t=e.target;
+  if(t.classList.contains('star')){ const kw=t.dataset.kw; saved=saved.includes(kw)?saved.filter(x=>x!==kw):[...saved,kw]; localStorage.setItem('saved',JSON.stringify(saved)); renderSub(); }
+  else if(t.classList.contains('an')){ t.textContent='…'; await etsyCheck(t.dataset.kw); }
+  else if(t.classList.contains('dig')){ $('#q').value=t.dataset.kw; analyze(t.dataset.kw); window.scrollTo(0,0); }
+  else if(t.tagName==='TH'&&t.dataset.k){ if(sortKey===t.dataset.k) sortDir*=-1; else {sortKey=t.dataset.k; sortDir=t.dataset.k==='keyword'?1:-1;} renderSub(); }
+});
+$('#analyzeAll').addEventListener('click',async()=>{
+  const top=[...subRows].sort((a,b)=>(b.volume||0)-(a.volume||0)).slice(0,10);
+  for(const r of top){ await etsyCheck(r.keyword); }
+});
+$('#csv').addEventListener('click',()=>{
+  const cols=['keyword','source','volume','kd','competition','difficulty','opportunity'];
+  const csv=[cols.join(',')].concat(subRows.map(r=>cols.map(c=>JSON.stringify(r[c]==null?'':r[c])).join(','))).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download=($('#q').value||'keywords')+'.csv'; a.click();
+});
+// ----- tabs -----
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  $('#pane-kw').hidden=t.dataset.tab!=='kw'; $('#pane-niche').hidden=t.dataset.tab!=='niche';
+}));
+// ----- niche finder -----
+let niches=[], nicheProducts=[];
+function vBadge(v){ const k=v==='WINNER'?'W':v==='near miss'?'N':'K'; return `<span class="badge ${k}">${v}</span>`; }
+function renderNiches(){
+  $('#niches').hidden=false; $('#ncount').textContent=niches.length+' screened, '+niches.filter(n=>n.verdict==='WINNER').length+' winners';
+  const rows=[...niches].sort((a,b)=>b.total-a.total||b.velocity_30d-a.velocity_30d);
+  $('#ntbl').innerHTML=`<tr><th>Niche</th><th>Verdict</th><th>Score</th><th>Demand</th><th>Open door</th><th>Price</th><th>Gap</th><th>Reviews 30d (top)</th><th>Est. sales/mo (top)</th><th>Etsy comp.</th><th>Median $</th><th>Digital</th><th>Young/small/big shops</th><th>Google vol</th><th>Trend</th><th>Tag</th></tr>`+
+    rows.map((n,i)=>`<tr class="nrow" data-i="${i}" style="cursor:pointer"><td><span class="kw">${n.keyword}</span><div class="src">${n.source||''}</div></td><td>${vBadge(n.verdict)}</td><td><b>${n.total}</b>/17</td><td>${n.demand}</td><td>${n.open_door}</td><td>${n.price_room}</td><td>${n.quality_gap}</td><td>${fmt(n.velocity_30d)}</td><td>${fmt(n.est_sales_mo_top)}</td><td>${compBadge(n.competition)}</td><td>${money(n.price_median)}</td><td>${n.digital_share!=null?n.digital_share+'%':'–'}</td><td>${fmt(n.young_shops)} / ${fmt(n.small_shops)} / ${fmt(n.big_shops)}</td><td>${volBadge(n.google_volume)}</td><td>${spark(n.trend)}</td><td>${n.tag_ok?'<span class="muted">ok</span>':'<span class="tagbad">'+n.keyword.length+'</span>'}</td></tr>`).join('');
+  $('#ntbl').querySelectorAll('tr.nrow').forEach(tr=>tr.addEventListener('click',()=>{
+    const n=rows[Number(tr.dataset.i)]; const nx=tr.nextElementSibling;
+    if(nx&&nx.classList.contains('detail')){ nx.remove(); return; }
+    const d=document.createElement('tr'); d.className='detail';
+    d.innerHTML=`<td colspan="16"><table class="mini"><tr><th>Product</th><th>Price</th><th>Age (days)</th><th>Favorites</th><th>Reviews 30d</th><th>Est. sales/mo</th><th>Est. revenue/mo</th><th>Shop</th><th>Shop sales</th><th>Type</th></tr>${n.products.map(p=>`<tr><td><a class="kw" href="${p.url}" target="_blank" rel="noopener">${p.title}</a>${p.rising?' <span class="badge g" style="font-size:11px;padding:1px 6px">rising</span>':''}</td><td>${money(p.price)}</td><td>${fmt(p.age_days)}</td><td>${fmt(p.favorites)}</td><td>${fmt(p.reviews_30d)}</td><td>${fmt(p.est_sales_mo)}</td><td>${p.est_revenue_mo!=null?'$'+fmt(p.est_revenue_mo):'–'}</td><td>${p.shop||'–'}</td><td>${fmt(p.shop_sales)}</td><td class="src">${p.type||''}</td></tr>`).join('')}</table>
+      <div style="margin-top:8px"><b>Low-star share, last 90 days:</b> ${n.low_star_share}%${n.complaints.length?'<br>'+n.complaints.map(c=>`<div class="complaint">“${c}”</div>`).join(''):' <span class="muted">no low-star reviews found</span>'}</div></td>`;
+    tr.after(d);
+  }));
+}
+function renderProducts(){
+  if(!nicheProducts.length){ $('#products').hidden=true; return; }
+  $('#products').hidden=false;
+  $('#ptbl').innerHTML=`<tr><th>Product</th><th>Niche</th><th>Price</th><th>Age (days)</th><th>Reviews 30d</th><th>Est. sales/mo</th><th>Est. revenue/mo</th><th>Shop</th><th>Shop sales</th></tr>`+
+    nicheProducts.map(p=>`<tr><td><a class="kw" href="${p.url}" target="_blank" rel="noopener">${p.title}</a>${p.rising?' <span class="badge g" style="font-size:11px;padding:1px 6px">rising</span>':''}</td><td>${p.niche}</td><td>${money(p.price)}</td><td>${fmt(p.age_days)}</td><td>${fmt(p.reviews_30d)}</td><td>${fmt(p.est_sales_mo)}</td><td>$${fmt(p.est_revenue_mo)}</td><td>${p.shop||'–'}</td><td>${fmt(p.shop_sales)}</td></tr>`).join('');
+}
+$('#nf').addEventListener('submit',e=>{
+  e.preventDefault(); const q=$('#nq').value.trim(); if(!q) return;
+  niches=[]; nicheProducts=[]; $('#nerr').innerHTML=''; $('#niches').hidden=true; $('#products').hidden=true;
+  $('#nlog').hidden=false; $('#nlog').textContent=''; $('#nbar').hidden=false; $('#nbar i').style.width='0';
+  $('#ngo').disabled=true; $('#ngo').textContent='Running…';
+  const es=new EventSource(`/api/niche?q=${encodeURIComponent(q)}&n=${$('#nn').value}&top=${$('#ntop').value}&deep=${$('#ndeep').checked?1:0}`);
+  const log=m=>{ $('#nlog').textContent+=m+'\n'; $('#nlog').scrollTop=1e9; };
+  es.addEventListener('log',e=>log(JSON.parse(e.data).msg));
+  es.addEventListener('progress',e=>{ const d=JSON.parse(e.data); $('#nbar i').style.width=(100*d.i/d.n)+'%'; log(`[${d.i}/${d.n}] ${d.keyword}`); });
+  es.addEventListener('niche',e=>{ niches.push(JSON.parse(e.data)); renderNiches(); });
+  es.addEventListener('error',e=>{ if(e.data){ $('#nerr').innerHTML=`<div class="err">${JSON.parse(e.data).message}</div>`; } es.close(); $('#ngo').disabled=false; $('#ngo').textContent='Find niches'; });
+  es.addEventListener('done',e=>{ const d=JSON.parse(e.data); niches=d.niches; nicheProducts=d.products; renderNiches(); renderProducts(); log(`Done. ${d.flagged.length?'Skipped for trademark risk: '+d.flagged.join(', '):''}`); es.close(); $('#ngo').disabled=false; $('#ngo').textContent='Find niches'; $('#nbar i').style.width='100%'; });
+});
+$('#ncsv').addEventListener('click',()=>{
+  const cols=['keyword','verdict','total','demand','open_door','price_room','quality_gap','velocity_30d','est_sales_mo_top','competition','distinct_shops','young_shops','small_shops','big_shops','price_low','price_median','price_high','digital_share','new_listings_90d','google_volume','kd','low_star_share'];
+  const csv=[cols.join(',')].concat(niches.map(r=>cols.map(c=>JSON.stringify(r[c]==null?'':r[c])).join(','))).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='niches-'+($('#nq').value||'run')+'.csv'; a.click();
+});
+$('#showSaved').addEventListener('click',()=>{ alert(saved.length?saved.join('\n'):'No saved keywords yet. Click the star next to a keyword.'); });
+</script>
+</body>
+</html>
