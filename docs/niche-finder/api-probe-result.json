@@ -1,124 +1,124 @@
 {
   "keyword": "wedding planner template",
-  "at": "2026-10-16T15:52:07.015Z",
+  "at": "2026-10-16T16:05:58.389Z",
   "calls": [
     {
       "path": "/openapi-ping",
       "status": 200,
-      "ms": 420,
+      "ms": 440,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165927.39",
-        "x-etsy-request-uuid": "EunH4F_bpGfQ6RTyMa1JLZRkyN1f",
+        "x-etsy-generated": "1792166758.78",
+        "x-etsy-request-uuid": "EuipWoK-Lz5njyhvI78rENAxnx4e",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "4",
-        "x-remaining-today": "4999",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165927.285784,VS0,VE150"
+        "x-remaining-today": "4970",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166759.674421,VS0,VE155"
       }
     },
     {
       "path": "/buyer-taxonomy/nodes",
       "status": 200,
-      "ms": 2031,
+      "ms": 1844,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165929.6",
-        "x-etsy-request-uuid": "EuA8OUFyjbd4nfMOPttA-G4Ri1e4",
+        "x-etsy-generated": "1792166760.78",
+        "x-etsy-request-uuid": "EuMTESqvW7w1koEgAKVlktDVPk21",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
-        "x-remaining-this-second": "3",
-        "x-remaining-today": "4998",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165928.750217,VS0,VE1916"
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4969",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166759.141214,VS0,VE1704"
       }
     },
     {
       "path": "/listings/active",
       "status": 200,
-      "ms": 1843,
+      "ms": 1688,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165931.47",
-        "x-etsy-request-uuid": "Eu1lAnTZIKcW1C6vN0sRnHHrfnbf",
+        "x-etsy-generated": "1792166762.72",
+        "x-etsy-request-uuid": "EugasEQRGrgMAFwXxlNdiYenKG47",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "4",
-        "x-remaining-today": "4997",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165930.033687,VS0,VE1499"
+        "x-remaining-today": "4968",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166761.246184,VS0,VE1537"
       }
     },
     {
       "path": "/listings/batch",
       "status": 200,
-      "ms": 733,
+      "ms": 596,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165932.68",
-        "x-etsy-request-uuid": "Euw3ViOS17VhmcOHrki9HPWRPA51",
+        "x-etsy-generated": "1792166763.65",
+        "x-etsy-request-uuid": "Eu0KZEA70uJPXXcOdiQ06gvfMse1",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "4",
-        "x-remaining-today": "4996",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165932.128224,VS0,VE610"
+        "x-remaining-today": "4967",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166763.190861,VS0,VE518"
       }
     },
     {
       "path": "/shops/51112273/reviews",
       "status": 200,
-      "ms": 201,
+      "ms": 193,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165933.2",
-        "x-etsy-request-uuid": "EuT32Hv5D2bEUvztdI9MxN4aAQf5",
+        "x-etsy-generated": "1792166764.13",
+        "x-etsy-request-uuid": "EuDbFmdPERM2NH-kzOaJqVL51Xa2",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "4",
-        "x-remaining-today": "4995",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165933.113044,VS0,VE141"
+        "x-remaining-today": "4966",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166764.033973,VS0,VE147"
       }
     },
     {
       "path": "/listings/1785440881/reviews",
       "status": 200,
-      "ms": 217,
+      "ms": 219,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165933.67",
-        "x-etsy-request-uuid": "EuRSTS5iWQ28wyMQTAOjG7a_Xtb0",
+        "x-etsy-generated": "1792166764.6",
+        "x-etsy-request-uuid": "Euh1UxMnYvrxn5baQIELlV7eCJaa",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "3",
-        "x-remaining-today": "4994",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165934.565979,VS0,VE155"
+        "x-remaining-today": "4965",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166764.478755,VS0,VE174"
       }
     },
     {
       "path": "/shops/51112273/listings/active",
       "status": 200,
-      "ms": 1989,
+      "ms": 1169,
       "limits": {
         "x-cache": "MISS",
         "x-cache-hits": "0",
-        "x-etsy-generated": "1792165935.87",
-        "x-etsy-request-uuid": "EujSXz6qbwJg_S3CnyRsZTV5pw44",
+        "x-etsy-generated": "1792166766",
+        "x-etsy-request-uuid": "EupbURcQq285ueclBAmHT5HpR87f",
         "x-limit-per-day": "5000",
         "x-limit-per-second": "5",
         "x-remaining-this-second": "4",
-        "x-remaining-today": "4993",
-        "x-served-by": "cache-toj-leto2350035-TOJ",
-        "x-timer": "S1792165934.035276,VS0,VE1892"
+        "x-remaining-today": "4964",
+        "x-served-by": "cache-mad2200104-MAD",
+        "x-timer": "S1792166765.949325,VS0,VE1109"
       }
     }
   ],
@@ -453,7 +453,7 @@
     ]
   },
   "search": {
-    "count_total": 46201,
+    "count_total": 46202,
     "returned": 100,
     "listing_type_counts": {
       "download": 100

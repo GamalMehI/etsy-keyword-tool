@@ -14,6 +14,7 @@ const ROOT = __dirname;
 const ENV = loadEnv(path.join(ROOT, '.env'));
 const ETSY_MOCK = (process.env.ETSY_MOCK || ENV.ETSY_MOCK) === '1';
 const ETSY_KEY = ETSY_MOCK ? 'mock' : (process.env.ETSY_API_KEY || ENV.ETSY_API_KEY || '');
+const ETSY_SECRET = process.env.ETSY_SHARED_SECRET || ENV.ETSY_SHARED_SECRET || '';
 const SEMRUSH_KEY = process.env.SEMRUSH_API_KEY || ENV.SEMRUSH_API_KEY || '';
 const SEMRUSH_DB = process.env.SEMRUSH_DB || ENV.SEMRUSH_DB || 'us';
 const APP_PASSWORD = process.env.APP_PASSWORD || ENV.APP_PASSWORD || '';
@@ -143,7 +144,7 @@ async function etsyGet(pathname, params) {
   if (ETSY_MOCK) { await sleep(5); return mockEtsy(pathname, params); }
   const url = new URL('https://openapi.etsy.com/v3/application' + pathname);
   for (const [k, v] of Object.entries(params || {})) url.searchParams.set(k, v);
-  const r = await fetch(url, { headers: { 'x-api-key': ETSY_KEY } });
+  const r = await fetch(url, { headers: { 'x-api-key': `${ETSY_KEY}:${ETSY_SECRET}` } });
   if (!r.ok) throw new Error(`Etsy ${r.status}: ${(await r.text()).slice(0, 200)}`);
   return r.json();
 }
