@@ -17,21 +17,29 @@ async function shopReviews(client,shop) {
   const t=now(),first=!shop.last_review_ts;
   // Freeze the first backfill's lower bound and resume a partial pagination next run.
   const min=first?(shop.review_since||t-90*86400):Math.max(shop.review_since||0,shop.last_review_ts-1);
+  const cutoff=first?(shop.backfill_until||t):t;
+  if(first&&!shop.backfill_until)run('UPDATE shops SET backfill_until=? WHERE shop_id=?',cutoff,shop.shop_id);
   let offset=first?(shop.backfill_offset||0):0;
   if(first&&!shop.review_since)run('UPDATE shops SET review_since=? WHERE shop_id=?',min,shop.shop_id);
   for(;offset<=9900;offset+=100){
-    const r=await client.get(`/shops/${shop.shop_id}/reviews`,{min_created:min,limit:100,offset});
+    const r=await client.get(`/shops/${shop.shop_id}/reviews`,{min_created:min,max_created:cutoff,limit:100,offset});
     saveReviews(r.results||[],shop.shop_id);
     if(first)run('UPDATE shops SET backfill_offset=? WHERE shop_id=?',offset+100,shop.shop_id);
     if(offset+100>=r.count||(r.results||[]).length<100){
-      run('UPDATE shops SET last_review_ts=?,backfill_offset=0 WHERE shop_id=?',t,shop.shop_id);
+      run('UPDATE shops SET last_review_ts=?,backfill_offset=0 WHERE shop_id=?',cutoff,shop.shop_id);
       await classifyReviewed(client,shop.shop_id);return;
     }
   }
   // Stay conservative if an API pagination ceiling prevents full coverage.
 }
+async function parallel(items,limit,task) {
+  let index=0,error;
+  await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(!error&&index<items.length){const item=items[index++];try{await task(item);}catch(e){error=e;}}}));
+  if(error)throw error;
+}
 async function collect({bootstrap=false}={}) {
   const id=claimJob();if(!id)return {already_running:true};
+  setSetting('scheduled_day',new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()));
   const client=createClient({background:true});
   const progress=(step,message='')=>run('UPDATE jobs SET step=?,message=?,calls=? WHERE id=?',step,message,client.calls,id);
   let status='success',message='Collecte terminée';
@@ -64,10 +72,11 @@ async function collect({bootstrap=false}={}) {
       if(!bootstrap){progress('C · Expansion des boutiques');await expandShops(client,Math.max(0,1000-(client.calls-startDiscovery)));}
       progress('D · Historique des nouvelles boutiques');
       // Classifications can have been interrupted after reviews finished; retry separately.
-      for(const s of all(`SELECT s.* FROM shops s LEFT JOIN shop_snapshots ss ON ss.shop_id=s.shop_id AND ss.day=? ORDER BY CASE WHEN s.last_review_ts=0 THEN 0 ELSE 1 END,ss.transaction_sold_count DESC`,day())) {
+      await parallel(all(`SELECT s.* FROM shops s LEFT JOIN shop_snapshots ss ON ss.shop_id=s.shop_id AND ss.day=? ORDER BY CASE WHEN s.last_review_ts=0 THEN 0 ELSE 1 END,ss.transaction_sold_count DESC`,day()),4,async s=>{
         if(s.last_review_ts===0){progress('D · Historique 90 jours',s.shop_name);await shopReviews(client,s);}
         else await classifyReviewed(client,s.shop_id);
-      }
+      });
+      run('DELETE FROM api_events WHERE ts<?',Date.now()-30*86400000);
     }
   } catch(e) {
     status=e.code==='BUDGET'?'budget':'error';message=e.code==='BUDGET'?'Réserve préservée. Les données partielles seront reprises à la prochaine collecte.':e.message;
@@ -83,6 +92,9 @@ function schedule() {
     const hour=setting('collect_hour',COLLECT_HOUR);
     const parts=Object.fromEntries(new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'}).formatToParts(new Date()).map(p=>[p.type,p.value]));
     const date=`${parts.year}-${parts.month}-${parts.day}`;
+    const latest=one('SELECT started FROM jobs ORDER BY id DESC LIMIT 1');
+    const lastDate=latest?new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Casablanca',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(latest.started*1000)):null;
+    if(lastDate===date){setSetting('scheduled_day',date);return;}
     if(Number(parts.hour)>=hour && setting('scheduled_day')!==date){setSetting('scheduled_day',date);collect().catch(()=>{});}
   };
   const timer=setInterval(tick,30000);timer.unref();return timer;

@@ -20,8 +20,8 @@ function recordHeaders(headers) {
   transaction(() => run(`UPDATE api_calls SET remaining_reported=CASE WHEN ? IS NULL THEN remaining_reported WHEN remaining_reported IS NULL THEN ? ELSE MIN(remaining_reported,?) END,last_headers=? WHERE day=?`,remain,remain,remain,JSON.stringify(h),day()));
 }
 function createClient({ background=false, maxCalls=Infinity, deadline=Infinity, fetchImpl=fetch, sleepImpl=sleep }={}) {
-  let calls=0;
-  return { get calls() { return calls; }, async get(pathname,params={}) {
+  let calls=0,lastResponse=null;
+  return { get calls() { return calls; }, get lastResponse() { return lastResponse; }, async get(pathname,params={}) {
     if (!/^\/(?:listings|shops|buyer-taxonomy|openapi-ping)(?:\/|$)/.test(pathname) || pathname.includes('..')) throw new Error('Endpoint Etsy interdit');
     if (MOCK) throw new Error('Le mode exemple utilise uniquement sa base locale');
     if (!ETSY_KEY || !ETSY_SECRET) throw new Error('Configurer ETSY_API_KEY et ETSY_SHARED_SECRET dans .env');
@@ -32,10 +32,24 @@ function createClient({ background=false, maxCalls=Infinity, deadline=Infinity, 
       const wait=reserveCall(background); calls++;
       await sleepImpl(wait);
       if (Date.now()>=deadline) throw new BudgetError('Délai de cette opération atteint');
+      // Recheck at dispatch as well: a suspended event loop must never release a burst.
+      let event;
+      while(event==null){
+        const gate=transaction(()=>{
+          const last=one('SELECT ts FROM api_events ORDER BY ts DESC LIMIT 1')?.ts||0;
+          const pause=Math.max(0,last+260-Date.now());
+          if(pause)return {pause};
+          return {id:run('INSERT INTO api_events(day,ts,endpoint,status,background) VALUES(?,?,?,NULL,?)',day(),Date.now(),pathname,background?1:0).lastInsertRowid};
+        });
+        if(gate.id!=null)event=gate.id;else await sleep(gate.pause);
+        if(Date.now()>=deadline)throw new BudgetError('Délai de cette opération atteint');
+      }
       let r;
       try { r=await fetchImpl(url,{ headers:{ 'x-api-key':`${ETSY_KEY}:${ETSY_SECRET}` }, signal:AbortSignal.timeout(Math.min(20000,Math.max(1,deadline-Date.now()))) }); }
       catch { throw new Error('Etsy indisponible ou délai dépassé'); }
       recordHeaders(r.headers);
+      run('UPDATE api_events SET status=? WHERE id=?',r.status,event);
+      lastResponse={path:pathname,status:r.status,limits:Object.fromEntries([...r.headers].filter(([k])=>k.startsWith('x-limit')||k.startsWith('x-remaining')))};
       if (r.status===429 && attempt<3) { const retry=Number(r.headers.get('retry-after')) || 0; await sleepImpl(Math.min(15000,Math.max(retry*1000,1000*2**attempt))); continue; }
       // Never include remote bodies or headers in errors: credentials cannot leak via a remote echo.
       if (!r.ok) { const e=new Error(`Etsy HTTP ${r.status}`); e.status=r.status; throw e; }

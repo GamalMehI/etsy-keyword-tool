@@ -11,6 +11,7 @@ test('K lifetime, default, clamping, median and recent calibration',()=>{
  assert.equal(calibrateK({sales:15000,reviews:1000,recentSales:100,recentReviews:10,historyDays:30}),10);
  assert.equal(calibrateK({sales:15000,reviews:1000,recentSales:100,recentReviews:9,historyDays:30}),15);
  assert.equal(calibrateK({sales:15000,reviews:1000,recentSales:100,recentReviews:10,historyDays:29}),15);
+ assert.equal(calibrateK({sales:15000,reviews:1000,recentSales:null,recentReviews:10,historyDays:30}),15);
  assert.equal(globalK(Array.from({length:29},()=>({transaction_sold_count:2000,review_count:100}))),12);
  assert.equal(globalK(Array.from({length:30},()=>({transaction_sold_count:2000,review_count:100}))),20);
 });

@@ -22,6 +22,8 @@ function openDb(file = DB_PATH) {
     CREATE INDEX IF NOT EXISTS estimates_rank ON estimates(day,period,revenue DESC);
     CREATE TABLE IF NOT EXISTS keyword_reports(keyword TEXT, day TEXT, report TEXT, PRIMARY KEY(keyword,day));
     CREATE TABLE IF NOT EXISTS api_calls(day TEXT PRIMARY KEY, used INTEGER, remaining_reported INTEGER, last_headers TEXT);
+    CREATE TABLE IF NOT EXISTS api_events(id INTEGER PRIMARY KEY,day TEXT,ts INTEGER,endpoint TEXT,status INTEGER,background INTEGER);
+    CREATE INDEX IF NOT EXISTS api_event_time ON api_events(ts);
     CREATE TABLE IF NOT EXISTS api_gate(id INTEGER PRIMARY KEY, next_at INTEGER);
     INSERT OR IGNORE INTO api_gate VALUES(1,0);
     CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY, value TEXT);
@@ -31,6 +33,7 @@ function openDb(file = DB_PATH) {
     CREATE INDEX IF NOT EXISTS listings_shop ON listings(shop_id);
     CREATE INDEX IF NOT EXISTS ss_day ON shop_snapshots(day);
   `);
+  if (!db.prepare('PRAGMA table_info(shops)').all().some(c=>c.name==='backfill_until')) db.exec('ALTER TABLE shops ADD COLUMN backfill_until INTEGER');
   return db;
 }
 const db = openDb();

@@ -41,12 +41,12 @@ async function build(q) {
       transaction(()=>{for(const l of rows)run('INSERT OR IGNORE INTO listing_keywords VALUES(?,?,0)',l.listing_id,q);});
       pool={total:known?.total_count||8940,digital_share:.97,rows:rows.map(l=>({...l,api_rank:0}))};
     }else if(known?.last_searched>=now()-86400&&knownIds.length>=60){
-      pool={total:known.total_count,digital_share:known.digital_share,rows:all(`SELECT l.*,ls.num_favorers,ls.views FROM listings l JOIN listing_keywords lk ON lk.listing_id=l.listing_id LEFT JOIN listing_snapshots ls ON ls.listing_id=l.listing_id AND ls.day=? WHERE lk.keyword=? ORDER BY COALESCE(ls.num_favorers,0) DESC LIMIT 150`,day(),q)};
+      pool={total:known.total_count,digital_share:known.digital_share,rows:all(`SELECT l.*,1 AS tracked,ls.num_favorers,ls.views FROM listings l JOIN listing_keywords lk ON lk.listing_id=l.listing_id LEFT JOIN listing_snapshots ls ON ls.listing_id=l.listing_id AND ls.day=? WHERE lk.keyword=? ORDER BY COALESCE(ls.num_favorers,0) DESC LIMIT 150`,day(),q)};
     }else pool=await searchPool(client,q);
     if(!MOCK){
       const top=pool.rows.slice(0,150);
-      transaction(()=>{for(const l of top){if(l.listing_type==='download'&&saveListing(l,q))linkListing(l,q);}});
-      const missing=top.filter(l=>!one('SELECT 1 FROM shops s JOIN listings l ON l.shop_id=s.shop_id WHERE l.listing_id=? AND l.last_seen>=?',l.listing_id,now()-86400)).map(l=>l.listing_id);
+      transaction(()=>{for(const l of top){if(l.tracked)continue;if(l.listing_type==='download'&&saveListing(l,q))linkListing(l,q);}});
+      const missing=top.filter(l=>!one('SELECT 1 FROM shops s JOIN listings l ON l.shop_id=s.shop_id WHERE l.listing_id=? AND s.last_seen>=? AND l.image_url<>\'\'',l.listing_id,now()-86400)).map(l=>l.listing_id);
       if(missing.length)await batchRefresh(client,missing);
       for(const l of top.slice(0,60))await listingReviews(client,l);
     }
@@ -61,7 +61,7 @@ async function build(q) {
   const leaders=top.slice(0,2).map(p=>p.listing_id);
   const complaints=leaders.flatMap(id=>all('SELECT rating,text,listing_id,created_ts FROM reviews WHERE listing_id=? AND rating<=3 AND created_ts>=? ORDER BY created_ts DESC LIMIT 5',id,now()-90*86400)).slice(0,5);
   const prices=top.map(p=>p.price_usd).filter(p=>p!=null);
-  const report={keyword:q,...scores,total_count:pool?.total||0,digital_share:pool?.digital_share||0,median_price:median(prices),price_range:prices.length?[Math.min(...prices),Math.max(...prices)]:[],median_age:median(top.map(p=>p.age_days)),google,subkeywords,products:top,complaints,calls:client.calls,warning,cached:false,at:now(),review_metric:'Avis observés sur 90 jours, pas le total à vie par produit'};
+  const report={keyword:q,...scores,total_count:pool?.total||0,digital_share:pool?.digital_share||0,priced:prices.length,median_price:median(prices),price_range:prices.length?[Math.min(...prices),Math.max(...prices)]:[],median_age:median(top.map(p=>p.age_days)),google,subkeywords,products:top,complaints,calls:client.calls,warning,cached:false,at:now(),review_metric:'Avis observés sur 90 jours, pas le total à vie par produit'};
   run('INSERT OR REPLACE INTO keyword_reports VALUES(?,?,?)',q,day(),JSON.stringify(report));return report;
 }
 module.exports={analyze,listingReviews};

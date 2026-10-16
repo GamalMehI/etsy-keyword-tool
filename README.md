@@ -1,58 +1,87 @@
-# Etsy Keyword Tool
+# Etsy Digital Niche Finder
 
-Type a keyword, get demand, trend, difficulty, Etsy competition, price stats and sub keywords. Zero dependencies, Node 18+.
+A local French dashboard for researching **digital downloads** with Etsy Open API v3. Built on the existing keyword tool, with no runtime dependencies. Requires **Node 24+** (`node:sqlite`). No Etsy web pages are fetched or automated.
 
-## Run
+## Setup
 
+```sh
+node --version                  # 24 or newer
+cp .env.example .env            # only if you do not already have .env
+# Edit .env privately: ETSY_API_KEY and ETSY_SHARED_SECRET are both required.
+npm run collect -- --bootstrap
+npm start
 ```
-cp .env.example .env   # add your keys
-node server.js         # open http://localhost:3456
+
+Open [the local dashboard](http://localhost:3456). The server binds to `127.0.0.1`. This Personal Access application is for local use; do not deploy it publicly. `APP_PASSWORD` retains HTTP Basic authentication (any username). Do not put credentials into a URL, source code, screenshot, or Git commit.
+
+`.env`, `data/` (SQLite, cache, logs), and the legacy `cache.json` are gitignored. Never commit them. There is no install step. The supplied live probe was rerun successfully on 2026-10-16; future verification uses `node scripts/api-probe.mjs` (about seven calls, now accounted for by the shared client).
+
+## Screens
+
+- **Produits tendance**: 7/30/90-day estimates normalized to sales and gross revenue per month; niche, USD price, age, confidence, language and text filters; sortable columns and pagination. English listings are shown by default. Product details show observed daily reviews × K, observed favorites, shop totals, and tags that open keyword analysis.
+- **Analyse de mot-clé**: a pool of up to 500 search results, pre-ranked by favorites and views; up to 150 detailed products, reviews for the best 60, then our top 48 by estimated sales. Four scores and a verdict, pricing, digital share, suggestions, optional Google volume and low-star reviews. This is our ranking of an API sample, not Etsy’s first page.
+- **Niches**: database-only rankings and weekly review-based revenue sparklines. Click a niche to filter its products. Products can belong to multiple niches, so niche revenues overlap.
+- **Collecte**: persisted API usage and remaining budget, protected interactive reserve, collection progress/outcome, history maturity, editable seeds and schedule.
+
+All estimated sales, revenue, growth, concentration and success figures are labeled `est.`. Confidence describes evidence coverage, not statistical certainty. Shop lifetime sales, favorites and prices are observed API values.
+
+## Daily collection
+
+```sh
+npm run collect                 # one daily refresh
+npm run collect -- --bootstrap # build/resume the initial pool
 ```
 
-## Two modes
+Bootstrap expands seeds using the existing Google autocomplete and optional Semrush helpers, searches deeper API pools, selects candidates with favorites/views signals, refreshes the first 3,000 by favorites, and backfills new shops’ 90-day reviews. Only `listing_type === "download"` enters `listings`; physical and `both` never enter it. Shop review discovery may add more digital listings. A partial bootstrap is useful immediately and can need a second day’s budget for complete reviews.
 
-**Keyword** tab: one keyword in, metrics plus sub keywords out. Click "Dig" on any sub keyword to recurse.
+Normal collection refreshes tracked listings and shops together with batch calls; collects new reviews from established shops; rotates discovery through least-recently searched keywords (up to roughly 1,000 calls); expands shops with over 100 estimated monthly digital sales weekly; then backfills new shops. Low digital-share keywords are disabled. Seeds are in `config/seeds.txt` and editable in the UI. The original trademark substring blocklist applies to every keyword and listing title. As a conservative consequence, the supplied `cross stitch pattern` seed matches `stitch` and is skipped. Saving seeds reports and removes blocked phrases.
 
-**Niche finder** tab: one root keyword in. The tool expands it into sub keywords (Google autocomplete plus Semrush related keywords if you have a key), drops trademark-risk phrases, then for each phrase pulls the top 100 Etsy listings, checks the shops behind the first 24, and counts reviews from the last 30 days on the top listings. Each phrase is scored out of 17:
+The client uses **key:shared-secret** authentication, USD request parameters, a persisted 260 ms gate (at most four starts per second), and a shared SQLite daily counter. It honors Etsy’s `x-remaining-today` as well as the app’s 5,000-call ceiling. Background work stops with **800 calls remaining**; interactive requests may use this reserve. The gate and job lock coordinate the server and CLI. Each retry counts; HTTP 429 backs off exponentially with at most three retries. Endpoint/status/timing logs contain no credentials or query text and are retained locally for 30 days. Reported quota may include calls made outside this app. API budget days use UTC; the UI schedule uses **Africa/Casablanca**.
 
-| part | what it measures | source |
-|---|---|---|
-| demand velocity (0-5) | reviews in the last 30 days on the top listings | Etsy reviews API with min_created |
-| open door (0-5) | page-1 shops under a year old or under 500 sales | Etsy shops API |
-| price room (0-3) | median price of the top 100 | Etsy listings API |
-| quality gap (0-2) | share of 1-3 star reviews in the last 90 days on the top 2 | Etsy reviews API |
-| Google volume bonus (0-2) | monthly Google searches | Semrush |
+Review inserts are idempotent by transaction ID. Buyer IDs are discarded. A frozen `min_created`/`max_created` window and persisted backfill cursor allow safe continuation. Unknown reviewed listings are classified through batch calls; only their type is stored when physical/unavailable. Interrupted processes are detected on the next collection. A concurrent second collector returns `already_running`.
 
-WINNER needs 10 or more with demand 2+ and open door 2+. Every niche row expands to its products with estimated monthly sales (reviews x 10) and the low-star review snippets, and a cross-niche "winning products" table ranks listings by estimated revenue.
+The running server checks every 30 seconds for the daily collection time (`COLLECT_HOUR`, default 06:00). You can change it in Collecte. It catches up after that hour when open and avoids repeating a job already started that day. It cannot wake a closed app or sleeping Mac.
 
-A run of 12 sub keywords is roughly 400 Etsy API calls, about 2 minutes, well under the 10,000 per day limit. Everything is cached for 7 days.
+For collection while the UI is closed, edit `scripts/com.etsy-niche-finder.collect.plist` with your absolute Node 24 path (`command -v node`) and project path, create `data/`, then install the edited file:
 
-Set `ETSY_MOCK=1` in .env to try the UI with fake data before you have a key.
+```sh
+mkdir -p data ~/Library/LaunchAgents
+cp scripts/com.etsy-niche-finder.collect.plist ~/Library/LaunchAgents/
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.etsy-niche-finder.collect.plist
+```
 
-## Data sources
+The plist uses the Mac’s local clock. Match that clock to Casablanca or adjust its Hour. The UI schedule does not rewrite launchd’s schedule. To unload: `launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.etsy-niche-finder.collect.plist`.
 
-| metric | source | key needed |
-|---|---|---|
-| Google volume, 12-month trend, KD, related keywords | Semrush Analytics API | SEMRUSH_API_KEY (Business plan, API units) |
-| Etsy competition, prices, listing ages, digital share, shop sales and ages | Etsy Open API v3 | ETSY_API_KEY (register an app at etsy.com/developers) |
-| Sub keyword suggestions | Google autocomplete | none |
+## How estimates work
 
-Without keys the tool still returns sub keywords from Google autocomplete. Clicks and CTR like eRank shows come from eRank's private dataset and are not available anywhere public, so they are not shown.
+Etsy exposes shop sales totals, **not sales per product**. Our figures are estimates of gross demand, comparable in intent to EverBee, with a public formula rather than a claim to exact transactions.
 
-The tool never loads etsy.com web pages, only the official API, so it does not trigger Etsy's bot protection.
+1. **Day one:** listing reviews in the selected period × shop K. K is lifetime shop sales / lifetime shop reviews, clamped to 4–60. Shops with fewer than 20 reviews use the tracked-shop median (default 12 until 30 shops). Once an exact 30-day baseline exists, a recent ratio is preferred if at least 10 reviews were gained.
+2. **With a full matching snapshot window:** 70% shop-sales-delta allocation + 30% review-based estimate. Allocation uses the listing’s share of digital reviews (60%), gained favorites (25%), and gained views (15%). The shop’s digital review share adjusts mixed shops. If a signal is absent its weight is redistributed among observed signals. No signals means no allocation; we do not invent an equal share. A shop with exactly one active digital listing and no physical listings allocates its entire sales delta to that listing.
+3. **Revenue:** estimated sales × current comparable USD price. Unknown/non-USD prices remain unavailable rather than being relabeled USD. A live batch check confirmed that Etsy can return EUR despite `currency=USD`; aggregates show their USD-price coverage and omit unavailable revenue. Revenue is before fees, tax, discounts, refunds, bundles and price changes.
 
-## Scores
+Snapshots are daily observations, not transaction history. We require matching baseline dates, rather than treating a gap as an exact period. Partial 7+ day history can improve confidence but is never extrapolated into a full 30/90-day delta. Zero reviews can coexist with real sales. Incomplete review coverage stays low confidence. Unknown/unavailable reviewed listings conservatively reduce digital allocation.
 
-- Etsy difficulty (0 to 100): 60 percent from log of total competing listings, 40 percent from incumbency (share of top-100 shops that are under a year old or under 500 sales, inverted).
-- Opportunity (0 to 100): Google demand on a log scale minus 0.6 x difficulty, plus 20. Strong at 65+, possible at 45+.
+Confidence is **Haute** with a full delta window and a shop of at most 20 digital listings or a listing holding at least 40% of its tracked digital reviews; **Moyenne** with 7+ days of snapshots or 10+ reviews in the period; otherwise **Basse**. Incomplete review coverage overrides these to Basse. These are evidence labels, not error bounds.
 
-Results are cached in cache.json for 7 days to save API units.
+A 90-day backfill supports 7- and 30-day prior-period comparisons on day one. A 90-day trend needs **180 days** of review coverage, so it is unavailable initially. No invented percentage replaces missing history or a zero comparison denominator. Daily charts are the review proxy; their bars need not sum to a blended total. Velocity uses all observed listing reviews × K / listing age, a lower-bound lifetime proxy while history is incomplete. Badges: Viral = younger than 90 days with 20+ estimated sales/month; Classique = older than two years with 30+ estimated sales/month.
 
-## Deploy free on Render
+Demand, competition, open-door and opportunity use the formulas in `docs/niche-finder/SPEC.md`. Without Semrush, the Google-volume weight is redistributed over the Etsy sales and successful-listing signals. Etsy does not expose lifetime review totals per listing, so the review-count competition component uses **observed 90-day listing reviews** (explicitly labeled in keyword reports). This can understate incumbency in partially collected markets. Scores and verdicts should be used to compare the observed sample, not as a promise of success.
 
-1. Push this repo to GitHub.
-2. At render.com choose New, Blueprint, pick the repo. The included render.yaml creates a free web service.
-3. Fill in ETSY_API_KEY, SEMRUSH_API_KEY (optional) and APP_PASSWORD when asked.
-4. You get a free https URL like https://etsy-keyword-tool.onrender.com. Free services sleep after 15 minutes idle and take about 30 seconds to wake.
+## Optional sources and cache
 
-Always set APP_PASSWORD on a public URL. Without it anyone who finds the link can spend your API quota.
+Semrush (`SEMRUSH_API_KEY`, optional, `SEMRUSH_DB=us`) supplies Google volume, a 12-month trend and related terms. With no key it returns null/empty results and the UI explains the absence. Google autocomplete needs no key and falls back to an empty list on failure. Their existing formats and seven-day JSON cache are preserved in `data/cache.json` (the old root cache is imported when present). Etsy snapshots are refreshed daily; keyword reports are cached per day. Missing review coverage triggers bounded API work, while fresh tracked data is reused.
+
+Fresh keyword analyses have a **110-call maximum** (including retries) and a 79-second Etsy deadline. Optional helpers time out after six seconds. Heavy review pagination or an exhausted reserve yields an explicitly partial report; missing data is never silently turned into high confidence. Only one fresh interactive analysis runs per server at a time.
+
+## Mock mode and verification
+
+```sh
+ETSY_MOCK=1 npm start             # same UI, separate data/mock.db; no Etsy or helper calls
+ETSY_MOCK=1 npm run collect
+npm test                         # node:test, no external requests
+```
+
+Mock mode seeds deterministic digital products, shops, timestamped reviews and 31 daily observations spanning 30 days. Its banner clearly says **Données d’exemple**. The live database is never seeded with fake records.
+
+Tests cover calibration/clamping, digital allocation, period normalization, blend/confidence boundaries, every score function’s endpoints, digital-only storage, discarded buyer IDs, concurrency/rate spacing, quota persistence/reserve, 429 retries, local HTTP routes and origin protection. A cold query with 20,000 listings and 100,000 reviews is checked against the one-second requirement. See `docs/niche-finder/NOTES.md` for live acceptance evidence and implementation qualifications.

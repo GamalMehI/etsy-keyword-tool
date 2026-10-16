@@ -9,7 +9,7 @@ function globalK(shops) {
   return ks.length ? median(ks) : 12;
 }
 function calibrateK({ sales, reviews, recentSales, recentReviews, historyDays=0, fallback=12 }) {
-  if (historyDays>=30 && recentReviews>=10 && recentSales>=0) return clamp(recentSales/recentReviews,4,60);
+  if (historyDays>=30 && recentReviews>=10 && Number.isFinite(recentSales) && recentSales>=0) return clamp(recentSales/recentReviews,4,60);
   return reviews>=20 && sales!=null ? clamp(sales/reviews,4,60) : clamp(fallback,4,60);
 }
 function allocation({ shopSales, digitalFactor, listings, singleDigital=false }) {

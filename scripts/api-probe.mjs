@@ -6,30 +6,23 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const env = Object.fromEntries(
-  readFileSync(join(root, '.env'), 'utf8').split('\n')
-    .filter((l) => l.trim() && !l.startsWith('#') && l.includes('='))
-    .map((l) => [l.slice(0, l.indexOf('=')).trim(), l.slice(l.indexOf('=') + 1).trim()])
-);
-const KEY = env.ETSY_API_KEY, SECRET = env.ETSY_SHARED_SECRET;
-if (!KEY || !SECRET) { console.error('Set ETSY_API_KEY and ETSY_SHARED_SECRET in .env'); process.exit(1); }
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { createClient } = require('../src/etsy');
+const client = createClient({ maxCalls: 8 });
 
 const keyword = process.argv[2] || 'wedding planner template';
 const report = { keyword, at: new Date().toISOString(), calls: [] };
 
 async function get(path, params = {}) {
-  const url = new URL('https://openapi.etsy.com/v3/application' + path);
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, Array.isArray(v) ? v.join(',') : v);
   const t = Date.now();
-  const r = await fetch(url, { headers: { 'x-api-key': `${KEY}:${SECRET}` } });
-  const limits = Object.fromEntries([...r.headers].filter(([k]) => k.startsWith('x-')));
-  const body = await r.json().catch(() => null);
-  report.calls.push({ path, status: r.status, ms: Date.now() - t, limits });
-  console.log(r.status, path, JSON.stringify(limits));
-  if (!r.ok) throw new Error(`${r.status} ${path}: ${JSON.stringify(body).slice(0, 300)}`);
-  await new Promise((res) => setTimeout(res, 250)); // stay well under 5 QPS
+  const body = await client.get(path, params);
+  const { status, limits } = client.lastResponse;
+  report.calls.push({ path, status, ms: Date.now() - t, limits });
+  console.log(status, path, JSON.stringify(limits));
   return body;
 }
+
 const days = (ts) => ts ? Math.round((Date.now() / 1000 - ts) / 86400) : null;
 
 try {
@@ -81,6 +74,7 @@ try {
   }
   report.ok = true;
 } catch (e) {
+  process.exitCode = 1;
   report.ok = false; report.error = String(e.message || e);
   console.error(report.error);
 }

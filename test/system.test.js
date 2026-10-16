@@ -38,6 +38,7 @@ test('daily reserve, header budget and interactive allowance survive client recr
  recordHeaders(new Headers({'x-remaining-today':'700','x-limit-per-day':'5000'}));assert.equal(budget().remaining,700);
  // Late responses can never restore a budget already spent by another process.
  recordHeaders(new Headers({'x-remaining-today':'900'}));assert.equal(budget().remaining,700);
+ const child=require('node:child_process').execFileSync(process.execPath,['-e',"const {budget}=require('./src/db');process.stdout.write(String(budget().remaining));"],{cwd:path.resolve(__dirname,'..'),env:process.env,encoding:'utf8'});assert.equal(Number(child),700);
  resetQuota();run('INSERT INTO api_calls VALUES(?,1,2,?)',day(),'{}');reserveCall(false);reserveCall(false);assert.throws(()=>reserveCall(false),{code:'BUDGET'});
 });
 test('429 backs off exponentially with at most three retries, safely redacts remote bodies',async()=>{
@@ -57,6 +58,23 @@ test('20,000 listings load from SQLite in under one second including cold query 
  });
  invalidate();const start=performance.now(),result=products(new URLSearchParams('limit=50'));const elapsed=performance.now()-start;
  assert.equal(result.total,20000);assert.equal(result.rows.length,50);assert.ok(elapsed<1000,`Cold product query: ${elapsed.toFixed(1)} ms`);console.log(`20,000 products cold DB response: ${elapsed.toFixed(1)} ms`);
+});
+test('fresh tracked keyword reuse preserves normalized listing metadata and spends no Etsy calls',async()=>{
+ const {saveShop,saveKeyword}=require('../src/db');
+ for(let i=1;i<=6;i++)saveShop({shop_id:i,shop_name:'Fixture Shop',create_date:now()-800*86400,transaction_sold_count:12000,review_count:1000,digital_listing_count:10,listing_active_count:10});
+ run('UPDATE listings SET image_url=? WHERE listing_id<=60','https://i.etsystatic.com/example.jpg');
+ run('UPDATE shops SET last_review_ts=?,review_since=?',now(),now()-90*86400);
+ saveKeyword('test digital planner','seed');run('UPDATE keywords SET last_searched=?,total_count=10000,digital_share=1 WHERE keyword=?',now(),'test digital planner');
+ for(let i=1;i<=60;i++)run('INSERT OR IGNORE INTO listing_keywords VALUES(?,?,?)',i,'test digital planner',i);
+ const before=one('SELECT created_ts,tags,price_usd FROM listings WHERE listing_id=1');
+ const original=global.fetch;let etsyCalls=0;
+ global.fetch=async url=>{if(String(url).includes('openapi.etsy.com')){etsyCalls++;throw new Error('Unexpected Etsy request');}return new Response('["",[]]');};
+ try{
+  const report=await require('../src/keyword').analyze('test digital planner');assert.equal(report.calls,0);assert.equal(etsyCalls,0);assert.equal(report.products.length,48);
+  assert.deepEqual(one('SELECT created_ts,tags,price_usd FROM listings WHERE listing_id=1'),before);
+  assert.ok(report.products.every(p=>Array.isArray(p.tags)));
+  assert.equal((await require('../src/keyword').analyze('test digital planner')).cached,true);
+ }finally{global.fetch=original;}
 });
 test('HTTP API, local host/origin protection and static assets',async()=>{
  const server=require('../server').createServer();await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));

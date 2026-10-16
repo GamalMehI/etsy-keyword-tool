@@ -70,7 +70,7 @@ async function classifyReviewed(client,shopId) {
 }
 async function expandShops(client,maxCalls=100) {
   const start=client.calls;
-  const shops=all(`SELECT s.shop_id FROM shops s JOIN listings l ON l.shop_id=s.shop_id JOIN estimates e ON e.listing_id=l.listing_id AND e.day=date('now') AND e.period=30 WHERE s.last_expanded<? GROUP BY s.shop_id HAVING SUM(e.sales)>100 ORDER BY SUM(e.sales) DESC`,now()-7*86400);
+  const shops=all(`SELECT s.shop_id FROM shops s JOIN listings l ON l.shop_id=s.shop_id JOIN estimates e ON e.listing_id=l.listing_id AND e.day=(SELECT MAX(day) FROM estimates WHERE period=30) AND e.period=30 WHERE s.last_expanded<? GROUP BY s.shop_id HAVING SUM(e.sales)>100 ORDER BY SUM(e.sales) DESC`,now()-7*86400);
   for(const shop of shops){
     for(let offset=0;offset<=9900;offset+=100) {
       if(client.calls-start>=maxCalls)return;
