@@ -1,10 +1,16 @@
 {
   "name": "etsy-keyword-tool",
   "version": "1.0.0",
-  "description": "Keyword and niche research for Etsy sellers using the official Etsy Open API, Semrush and Google autocomplete",
+  "description": "Local digital-product research with official Etsy data and transparent sales estimates",
   "main": "server.js",
-  "scripts": { "start": "node server.js" },
-  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node server.js",
+    "collect": "node scripts/collect.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=24"
+  },
   "license": "MIT",
   "private": true
 }

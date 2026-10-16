@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+ <key>Label</key><string>com.etsy-niche-finder.collect</string>
+ <key>ProgramArguments</key><array><string>/ABSOLUTE/PATH/TO/NODE24/bin/node</string><string>/Users/YOU/Documents/etsy-keyword-tool/scripts/collect.mjs</string></array>
+ <key>WorkingDirectory</key><string>/Users/YOU/Documents/etsy-keyword-tool</string>
+ <key>StartCalendarInterval</key><dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>0</integer></dict>
+ <key>StandardOutPath</key><string>/Users/YOU/Documents/etsy-keyword-tool/data/launchd.log</string>
+ <key>StandardErrorPath</key><string>/Users/YOU/Documents/etsy-keyword-tool/data/launchd-error.log</string>
+</dict></plist>
