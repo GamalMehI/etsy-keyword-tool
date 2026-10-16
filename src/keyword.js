@@ -30,6 +30,7 @@ async function analyze(q) {
 }
 async function build(q) {
   const client=createClient({maxCalls:110,deadline:Date.now()+79000});
+  const helperWork=MOCK?Promise.resolve([null,[],all('SELECT keyword FROM keywords WHERE active=1 LIMIT 8')]):Promise.all([semrushOverview(q),semrushRelated(q,30),expandKeyword(q,false)]);
   let pool,warning=null;
   const known=one('SELECT * FROM keywords WHERE keyword=?',q);
   const knownIds=all('SELECT listing_id FROM listing_keywords WHERE keyword=?',q).map(l=>l.listing_id);
@@ -55,7 +56,7 @@ async function build(q) {
   const ids=new Set(all('SELECT listing_id FROM listing_keywords WHERE keyword=?',q).map(r=>r.listing_id));
   const reviewedIds=new Set((pool?.rows||[]).slice(0,60).map(l=>l.listing_id));
   const top=dataset(30).filter(l=>ids.has(l.listing_id)&&reviewedIds.has(l.listing_id)).sort((a,b)=>b.monthly_sales-a.monthly_sales).slice(0,48);
-  const [google,related,suggest]=MOCK?[null,[],all('SELECT keyword FROM keywords WHERE active=1 LIMIT 8')]:await Promise.all([semrushOverview(q),semrushRelated(q,30),expandKeyword(q,false)]);
+  const [google,related,suggest]=await helperWork;
   const subkeywords=[...new Set([...related,...suggest].map(r=>r.keyword))].filter(k=>k!==q&&!hasTrademark(k)).slice(0,30);
   const scores=scoreProducts(top,pool?.total||0,google?.volume??null);
   const leaders=top.slice(0,2).map(p=>p.listing_id);

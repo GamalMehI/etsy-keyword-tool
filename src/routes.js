@@ -10,7 +10,7 @@ const { hasTrademark }=require('./trademark');
 function stats() {
  const hist=one('SELECT COUNT(DISTINCT day) AS days,MIN(day) AS first,MAX(day) AS last FROM listing_snapshots');
  const days=hist.first?Math.floor((Date.now()-Date.parse(hist.first))/86400000):0;
- return {mock:MOCK,etsy:!!(ETSY_KEY&&ETSY_SECRET),semrush:!!SEMRUSH_KEY,budget:{...budget(),reserve:RESERVE},listings:one('SELECT COUNT(*) AS n FROM listings WHERE active=1').n,shops:one('SELECT COUNT(*) AS n FROM shops').n,reviews:one('SELECT COUNT(*) AS n FROM reviews').n,history_days:days,snapshot_days:hist.days,last_snapshot:hist.last,job:one('SELECT * FROM jobs ORDER BY id DESC LIMIT 1')||null,hour:setting('collect_hour',COLLECT_HOUR),timezone:'Africa/Casablanca',keywords:all('SELECT keyword FROM keywords WHERE active=1 ORDER BY keyword').map(k=>k.keyword)};
+ return {mock:MOCK,etsy:!!(ETSY_KEY&&ETSY_SECRET),semrush:!!SEMRUSH_KEY,budget:{...budget(),reserve:RESERVE},listings:one('SELECT COUNT(*) AS n FROM listings WHERE active=1').n,shops:one('SELECT COUNT(*) AS n FROM shops').n,reviews:one('SELECT COUNT(*) AS n FROM reviews').n,history_days:days,snapshot_days:hist.days,last_snapshot:hist.last,job:one('SELECT * FROM jobs ORDER BY id DESC LIMIT 1')||null,hour:setting('collect_hour',COLLECT_HOUR),timezone:'Africa/Casablanca',niches:all('SELECT DISTINCT lk.keyword FROM listing_keywords lk JOIN listings l ON l.listing_id=lk.listing_id WHERE l.active=1 ORDER BY lk.keyword').map(k=>k.keyword),keywords:all('SELECT keyword FROM keywords WHERE active=1 ORDER BY keyword').map(k=>k.keyword)};
 }
 async function body(req) {
  let value='';for await(const chunk of req){value+=chunk;if(value.length>32000)throw Object.assign(new Error('Requête trop longue'),{status:413});}

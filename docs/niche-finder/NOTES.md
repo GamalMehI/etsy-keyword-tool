@@ -19,3 +19,15 @@ Historical browser research in docs/ is background only. This implementation fol
 - Matching daily baselines are required for a full shop delta. Unknown/inaccessible reviewed listings keep confidence low.
 - The original substring blocklist is preserved, including `stitch`; it conservatively blocks the supplied `cross stitch pattern` seed.
 - The old Render public-deployment blueprint was removed because this Personal Access app is local-only.
+
+## Acceptance evidence, 2026-10-16
+
+- Live probe: seven requests, all HTTP 200. It was run once before implementation.
+- Real bootstrap reached 48,808 active digital listings after the interactive validation (48,668 before it), 2,355 shops and 109,226 timestamped reviews. Zero non-download rows.
+- Bootstrap stopped cleanly on the reserve: 4,164 local calls counted that day, 800 remaining. This includes resumed work after a transient network timeout. Incomplete review backfills remain resumable next day.
+- Persisted dispatch logs: maximum 4 request starts in any rolling second. The earliest sequential bootstrap calls predated event logging; later concurrent calls are logged.
+- A fresh “wedding planner template” report: 48 ranked products, 42 Etsy calls, 26.4 seconds, no partial-data warning, no Semrush key. The cached UI replay spent zero additional calls.
+- Cold real-database products query: 505 ms at approximately 49k active products. End-to-end localhost HTTP measurement before keyword analysis was 488 ms.
+- Automated suite: 16 node:test tests passed. The 20,000-listing/100,000-review cold benchmark was approximately 139 ms. Mock-only test was also rerun after making reviews respect listing creation dates.
+- All four screens, filters/sorting, real product details/chart, and cached keyword replay checked in the browser at http://localhost:3456. No console errors. The live server is bound to 127.0.0.1:3456.
+- After the 42-call interactive analysis, the persisted remaining budget was 758. These interactive calls are separate from the bootstrap threshold.

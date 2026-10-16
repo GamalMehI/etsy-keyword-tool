@@ -17,8 +17,9 @@ async function expandKeyword(q, deep) {
   const seen = new Map();
   const clean = (kw) => norm(kw.replace(/\betsy\b/g, ' '));
   const add = (kw, src) => { kw = clean(kw); if (kw && kw !== norm(q) && !seen.has(kw)) seen.set(kw, src); };
-  for (const s of await googleSuggest(q)) add(s, 'google');
-  for (const s of await googleSuggest('etsy ' + q)) add(s, 'google:etsy');
+  const [direct, etsy] = await Promise.all([googleSuggest(q), googleSuggest('etsy ' + q)]);
+  for (const s of direct) add(s, 'google');
+  for (const s of etsy) add(s, 'google:etsy');
   if (deep) {
     for (const ch of 'abcdefghijklmnopqrstuvwxyz') {
       for (const s of await googleSuggest(q + ' ' + ch)) add(s, 'google:' + ch);

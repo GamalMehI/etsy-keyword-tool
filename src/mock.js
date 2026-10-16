@@ -17,7 +17,7 @@ function seedMock() {
           saveListing({listing_id:id,shop_id:sid,title:`${kw.replace(/\b\w/g,c=>c.toUpperCase())} · ${['Minimalist','Undated','Complete bundle','Editable','Weekly','Essential','All-in-one','Studio','Daily','Modern','Family','Simple'][j]} PDF`,url:`https://www.etsy.com/listing/${id}`,listing_type:'download',state:'active',language:j===11?'fr':'en-US',original_creation_timestamp:t-age*86400,price:{amount:Math.round(price*100),divisor:100,currency_code:'USD'},num_favorers:1200+j*277+f*19-d*(9+j),views:14000+j*990-d*(100+j*10),tags:[kw,`${kw} printable`,'digital download','editable template'],images:[{url_570xN:'/mock-product.svg'}],shop:{shop_name:`${['Paper','Studio','Little','Modern'][Math.floor(j/3)]}${['Nest','Ledger','Classroom','Habits','Vows','Wool','Notion','Botanical','Career','Canvas','Pages','Meals'][f]}`,create_date:t-((f<4?j:Math.floor(j/3))%3===0?240:1100+f*70)*86400,transaction_sold_count:sales,review_count:Math.round(sales/12),listing_active_count:f<4?1:3,digital_listing_count:f<4?1:3,review_average:4.8}},kw,date);
         }
         run('INSERT OR IGNORE INTO listing_keywords VALUES(?,?,?)',id,kw,j+1);
-        for(let d=0;d<180;d++){
+        for(let d=0;d<Math.min(180,age);d++){
           const n=((d+j*7+f*3)%11<3?1:0)+(j<3&&d%4===0?1:0);
           for(let z=0;z<n;z++)reviews.push({transaction_id:id*100000+d*10+z,shop_id:sid,listing_id:id,create_timestamp:t-d*86400-100,rating:d%19===0?2:5,review:d%19===0?'The editing instructions could be clearer.':'Clear files, easy to use.'});
         }

@@ -58,11 +58,10 @@ async function collect({bootstrap=false}={}) {
       }
       progress('C · Expansion des mots-clés');await expandSeeds(seedWords);
       const startDiscovery=client.calls;
-      // A bootstrap seeks a useful 3,000-product pool, not an unbounded search crawl.
-      const keywords=all(`SELECT * FROM keywords WHERE active=1 ORDER BY ${bootstrap?"CASE WHEN source='seed' THEN 0 ELSE 1 END,":''} last_searched,keyword`);
+      // Bootstrap samples every seed; expansion searches rotate in on subsequent daily runs.
+      const keywords=all(`SELECT * FROM keywords WHERE active=1 ${bootstrap?"AND source='seed'":''} ORDER BY ${bootstrap?"CASE WHEN source='seed' THEN 0 ELSE 1 END,":''} last_searched,keyword`);
       for(const k of keywords){
         if(client.calls-startDiscovery>=850)break;
-        if(bootstrap&&one('SELECT COUNT(*) AS n FROM listings WHERE active=1').n>=3500)break;
         if(k.last_searched>now()-86400)continue;
         progress('C · Découverte',k.keyword);await discover(client,k.keyword);
       }

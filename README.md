@@ -42,7 +42,7 @@ Review inserts are idempotent by transaction ID. Buyer IDs are discarded. A froz
 
 The running server checks every 30 seconds for the daily collection time (`COLLECT_HOUR`, default 06:00). You can change it in Collecte. It catches up after that hour when open and avoids repeating a job already started that day. It cannot wake a closed app or sleeping Mac.
 
-For collection while the UI is closed, edit `scripts/com.etsy-niche-finder.collect.plist` with your absolute Node 24 path (`command -v node`) and project path, create `data/`, then install the edited file:
+For collection while the UI is closed, edit `scripts/com.etsy-niche-finder.collect.plist` with your absolute Node 24 path (`node -p process.execPath`) and project path, create `data/`, then install the edited file:
 
 ```sh
 mkdir -p data ~/Library/LaunchAgents
