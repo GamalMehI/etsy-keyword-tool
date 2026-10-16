@@ -1,0 +1,641 @@
+<title>Etsy Niche Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: document tabs on top; the "Maquettes" tab holds an app shell (left nav + screen) drawn as a framed window. */
+:root{
+  --bg:#f2f4f1; --surface:#ffffff; --sunk:#e8ece8; --ink:#16201c; --muted:#5b6a63; --line:#d9dfda;
+  --accent:#1f6f5c; --accent-soft:#d6ebe3; --hot:#c8501a; --hot-soft:#fbe3d6;
+  --good:#2b7a4b; --warn:#a86b12; --bad:#b83232; --good-soft:#dcefe2; --warn-soft:#f6e9cf; --bad-soft:#f6dcdc;
+  --nav:#17231f; --nav-ink:#c9d6d0; --nav-active:#2b3b35;
+  --f-display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Helvetica Neue", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1513; --surface:#161e1b; --sunk:#1c2622; --ink:#e4ebe7; --muted:#93a39b; --line:#2a3631;
+  --accent:#4fbf9c; --accent-soft:#1d3a31; --hot:#ff8a52; --hot-soft:#3d2418;
+  --good:#5fcf8a; --warn:#e3a94a; --bad:#ef6f6f; --good-soft:#183526; --warn-soft:#3a2d14; --bad-soft:#3d1c1c;
+  --nav:#0b100e; --nav-ink:#a9bab2; --nav-active:#1f2c27; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1513; --surface:#161e1b; --sunk:#1c2622; --ink:#e4ebe7; --muted:#93a39b; --line:#2a3631;
+  --accent:#4fbf9c; --accent-soft:#1d3a31; --hot:#ff8a52; --hot-soft:#3d2418;
+  --good:#5fcf8a; --warn:#e3a94a; --bad:#ef6f6f; --good-soft:#183526; --warn-soft:#3a2d14; --bad-soft:#3d1c1c;
+  --nav:#0b100e; --nav-ink:#a9bab2; --nav-active:#1f2c27; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4vw,40px);font-weight:700}
+h2{font-size:24px;font-weight:700}
+h3{font-size:17px;font-weight:600}
+p{margin:0}
+.lede{color:var(--muted);max-width:68ch;margin-top:8px}
+.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* document tabs */
+.doctabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:22px;border-bottom:1px solid var(--line)}
+.doctabs button{border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.doctabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{padding-top:24px}
+
+/* app window */
+.window{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:0 18px 40px -24px rgb(0 0 0 / .35)}
+.chrome{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:var(--line);display:block}
+.url{margin-left:8px;font-family:var(--f-mono)}
+.mockflag{margin-left:auto;background:var(--warn-soft);color:var(--warn);padding:2px 8px;border-radius:99px;font-weight:600}
+.app{display:grid;grid-template-columns:210px minmax(0,1fr);min-height:640px}
+.nav{background:var(--nav);color:var(--nav-ink);padding:18px 10px;display:flex;flex-direction:column;gap:2px}
+.brand{font-family:var(--f-display);font-weight:700;font-size:17px;color:#fff;padding:0 10px 16px;display:flex;align-items:center;gap:8px}
+.brand b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:7px;background:var(--hot);color:#fff;font-size:14px}
+.nav button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:none;color:var(--nav-ink);padding:9px 10px;border-radius:8px;font-size:14px}
+.nav button[aria-selected="true"]{background:var(--nav-active);color:#fff}
+.nav svg{width:16px;height:16px;flex:none}
+.nav .quota{margin-top:auto;padding:12px 10px 0;font-size:12px}
+.qbar{height:6px;border-radius:99px;background:var(--nav-active);overflow:hidden;margin-top:6px;display:flex}
+.qbar i{display:block;height:100%}
+.screen{padding:22px;min-width:0;position:relative}
+.screen-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+
+/* controls */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+.chip span{color:var(--muted)}
+.search{flex:1 1 180px;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--surface);color:var(--muted);font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;font-weight:600;font-size:13px;background:var(--accent);color:#fff}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+
+/* stat strip */
+.strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.strip>div{background:var(--surface);padding:12px 14px;min-width:0}
+.strip .v{font-family:var(--f-mono);font-size:20px;font-weight:600;margin-top:2px}
+.strip .s{font-size:12px;color:var(--muted)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:860px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;font-weight:600;padding:9px 10px;background:var(--sunk);white-space:nowrap}
+th.r,td.r{text-align:right}
+td.num{white-space:nowrap}
+td{padding:9px 10px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--sunk)}
+.prod{display:flex;gap:10px;align-items:center;min-width:0}
+.thumb{width:44px;height:36px;border-radius:6px;flex:none;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:13px;color:#fff}
+.ptitle{font-weight:600;line-height:1.3;max-width:310px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pshop{font-size:12px;color:var(--muted)}
+.est{font-size:10px;color:var(--muted);margin-left:3px;font-family:var(--f-body)}
+.up{color:var(--good)}.down{color:var(--bad)}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:5px;margin-left:6px;vertical-align:1px}
+.b-viral{background:var(--hot-soft);color:var(--hot)}
+.b-classic{background:var(--accent-soft);color:var(--accent)}
+.conf{display:inline-flex;align-items:center;gap:5px;font-size:12px}
+.conf i{display:inline-flex;gap:2px}.conf i b{width:4px;height:10px;border-radius:1px;background:var(--line);display:block}
+.conf[data-l="3"] i b{background:var(--good)}
+.conf[data-l="2"] i b:nth-child(-n+2){background:var(--warn)}
+.conf[data-l="1"] i b:first-child{background:var(--bad)}
+
+/* drawer */
+.drawer{position:absolute;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--surface);border-left:1px solid var(--line);box-shadow:-20px 0 40px -28px rgb(0 0 0 / .45);padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}
+.drawer .hero{height:150px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-display);font-size:42px;font-weight:700;color:#fff}
+.close{position:absolute;top:12px;right:12px;border:1px solid var(--line);background:var(--surface);border-radius:8px;width:30px;height:30px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kv div{background:var(--sunk);border-radius:8px;padding:8px 10px;min-width:0}
+.kv b{display:block;font-family:var(--f-mono);font-size:15px}
+.kv span{font-size:11px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:3px 9px;display:inline-flex;gap:6px;align-items:center}
+.tag em{font-style:normal;color:var(--accent);font-weight:600}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:10px}
+
+/* keyword screen */
+.kwbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.kwbar .search{color:var(--ink);font-size:15px;padding:10px 12px;font-weight:500}
+.verdict{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px 16px;border-radius:10px;background:var(--good-soft);margin-bottom:14px}
+.verdict .pill{background:var(--good);color:#fff;font-weight:700;border-radius:99px;padding:4px 12px;font-size:13px}
+.verdict p{font-size:14px;max-width:70ch}
+.scores{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.score{border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.score .v{font-family:var(--f-mono);font-size:30px;font-weight:600;line-height:1.1;margin:4px 0 8px}
+.score .v small{font-size:13px;color:var(--muted);font-weight:400}
+.meter{height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px}
+.score p{font-size:12px;color:var(--muted);margin-top:8px}
+.two{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;margin-bottom:14px}
+.box{border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.box h3{margin-bottom:10px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 16px}
+.facts b{display:block;font-family:var(--f-mono);font-size:16px}
+.facts span{font-size:12px;color:var(--muted)}
+.subkw{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.subkw li{display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line);font-size:13px}
+.subkw li:first-child{border-top:0}
+.mini{height:5px;background:var(--sunk);border-radius:99px;overflow:hidden}.mini i{display:block;height:100%;background:var(--accent)}
+.link{border:0;background:none;color:var(--accent);font-weight:600;font-size:12px;padding:0}
+.quote{font-size:13px;border-left:3px solid var(--warn);padding:4px 0 4px 10px;color:var(--ink);margin-top:8px}
+.quote span{display:block;font-size:11px;color:var(--muted)}
+
+/* niches */
+.vpill{font-size:11px;font-weight:700;border-radius:99px;padding:3px 9px;white-space:nowrap}
+.v-go{background:var(--good-soft);color:var(--good)}.v-dig{background:var(--warn-soft);color:var(--warn)}.v-no{background:var(--bad-soft);color:var(--bad)}
+.bars{display:flex;gap:3px;align-items:center}
+.bars span{display:block;width:34px;height:6px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.bars span i{display:block;height:100%}
+
+/* collect */
+.quota-big{border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px}
+.qtrack{position:relative;height:16px;border-radius:6px;background:var(--sunk);overflow:hidden;display:flex;margin:12px 0 8px}
+.qtrack i{display:block;height:100%}
+.qreserve{position:absolute;top:0;bottom:0;right:0;width:16%;background:repeating-linear-gradient(45deg,transparent 0 5px,color-mix(in srgb,var(--muted) 30%,transparent) 5px 7px)}
+.qlegend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted)}
+.qlegend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.maturity{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:6px}
+.maturity div{border-top:3px solid var(--line);padding:10px 10px 0 0;font-size:13px;min-width:0}
+.maturity div.done{border-color:var(--accent)}
+.maturity div.now{border-image:linear-gradient(90deg,var(--accent) 70%,var(--line) 70%) 1}
+.maturity b{display:block;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+textarea{width:100%;min-height:150px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font-family:var(--f-mono);font-size:12px;padding:10px;resize:vertical}
+
+/* doc sections */
+.prose{max-width:76ch}
+.prose p+p{margin-top:10px}
+.section{margin-top:36px}
+.section>h2{margin-bottom:6px}
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px;counter-reset:s}
+.flow>div{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px;position:relative;min-width:0}
+.flow>div::before{counter-increment:s;content:counter(s);font-family:var(--f-mono);font-size:11px;color:var(--accent);font-weight:600}
+.flow h3{font-size:15px;margin:2px 0 6px}
+.flow p{font-size:13px;color:var(--muted)}
+.flow>div:not(:last-child)::after{content:"→";position:absolute;right:-10px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:16px;z-index:1}
+.formula{font-family:var(--f-mono);font-size:13px;background:var(--sunk);border-radius:8px;padding:12px 14px;overflow-x:auto;white-space:pre;margin-top:10px}
+.cards2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.card{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--surface);min-width:0}
+.card h3{margin-bottom:6px}
+.card p{font-size:14px;color:var(--muted)}
+.example{margin-top:14px;border-radius:10px;background:var(--accent-soft);padding:16px}
+.example ol{margin:8px 0 0;padding-left:20px}
+.example li{margin-top:4px}
+.doc-tbl{min-width:640px}
+.doc-tbl td{cursor:auto;vertical-align:top}
+.doc-tbl tbody tr:hover td{background:none}
+.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.status>div{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--surface);min-width:0}
+.status b{display:block;font-family:var(--f-mono);font-size:18px;margin-top:2px}
+.status span{font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+ul.nos{margin:10px 0 0;padding-left:18px}
+ul.nos li{margin-top:6px}
+.prompt{position:relative;margin-top:14px}
+.prompt pre{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:18px;white-space:pre-wrap;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;max-height:640px;overflow:auto;margin:0}
+.prompt .btn{position:absolute;top:10px;right:10px}
+.files{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.files div{border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;min-width:0}
+.files code{font-family:var(--f-mono);font-size:12px;color:var(--accent);word-break:break-all}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .nav{flex-direction:row;flex-wrap:wrap;padding:10px}
+  .nav .brand{width:100%;padding-bottom:8px}
+  .nav .quota{display:none}
+  .strip,.scores,.status{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .two,.cards2,.files{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr}
+  .flow>div:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-14px;transform:translateX(50%)}
+  .maturity{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:12px}
+}
+@media (prefers-reduced-motion:no-preference){.drawer{animation:slide .2s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">Outil local · produits digitaux uniquement</p>
+  <h1>Etsy Niche Finder</h1>
+  <p class="lede">Maquettes, fonctionnement, analyse de l'API Etsy et brief pour Codex. Il sert à repérer ce qui se vend déjà en digital sur Etsy, à estimer les ventes de chaque produit et à choisir la niche de ta boutique.</p>
+
+  <div class="doctabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="t-mock" aria-selected="true" aria-controls="p-mock">Maquettes</button>
+    <button role="tab" id="t-how" aria-selected="false" aria-controls="p-how">Fonctionnement</button>
+    <button role="tab" id="t-api" aria-selected="false" aria-controls="p-api">API Etsy</button>
+    <button role="tab" id="t-codex" aria-selected="false" aria-controls="p-codex">Prompt Codex</button>
+  </div>
+
+  <!-- ============ MAQUETTES ============ -->
+  <section class="panel" id="p-mock" role="tabpanel" aria-labelledby="t-mock">
+    <div class="window">
+      <div class="chrome"><span class="dots"><i></i><i></i><i></i></span><span class="url">localhost:3456</span><span class="mockflag">Données d'exemple</span></div>
+      <div class="app">
+        <nav class="nav" aria-label="Écrans">
+          <div class="brand"><b>N</b>Niche Finder</div>
+          <button data-screen="hot" aria-selected="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5c.5 2.5 3.5 3.8 3.5 7.2A3.5 3.5 0 0 1 4.5 8.7C4.5 7 5.5 6 6 5c.3 1.3 1 2 1.6 2.2C7.4 5.2 7.6 3 8 1.5Z"/></svg>Produits tendance</button>
+          <button data-screen="kw" aria-selected="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 4 4"/></svg>Analyse de mot-clé</button>
+          <button data-screen="niches" aria-selected="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>Niches</button>
+          <button data-screen="collect" aria-selected="false"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 13.5h12M4 11V7M8 11V3M12 11V5.5"/></svg>Collecte</button>
+          <div class="quota">Appels API aujourd'hui<br><span class="num" style="color:#fff">3 412</span> / 5 000
+            <div class="qbar"><i style="width:68%;background:var(--accent)"></i></div>
+          </div>
+        </nav>
+
+        <div class="screen" id="screen"></div>
+      </div>
+    </div>
+    <p class="lede" style="margin-top:12px">Clique sur un produit dans « Produits tendance » pour ouvrir sa fiche. Les boutons 7j / 30j / 90j changent la période. Les noms de produits et de boutiques sont inventés.</p>
+  </section>
+
+  <!-- ============ FONCTIONNEMENT ============ -->
+  <section class="panel" id="p-how" role="tabpanel" aria-labelledby="t-how" hidden>
+    <h2>Comment ça marche</h2>
+    <p class="lede">L'outil tourne sur ton Mac. Chaque matin, il interroge l'API officielle d'Etsy, garde uniquement les produits digitaux, prend une « photo » de leurs chiffres et la stocke dans une base locale. Les écrans lisent cette base, donc ils s'affichent instantanément et ne consomment aucun appel API.</p>
+
+    <div class="flow">
+      <div><h3>Mots-clés de départ</h3><p>Une liste de racines digitales (planner, template, svg…) élargie par Google et Semrush.</p></div>
+      <div><h3>Recherche Etsy</h3><p>Pour chaque mot-clé, les 200 premiers résultats et les plus récents. On ne garde que <span class="mono">listing_type = download</span>.</p></div>
+      <div><h3>Suivi quotidien</h3><p>Favoris, vues, prix et ventes totales de chaque boutique, relevés chaque jour par lots de 100.</p></div>
+      <div><h3>Avis datés</h3><p>Les nouveaux avis de chaque boutique, avec le produit concerné. Ce sont eux qui révèlent les ventes.</p></div>
+      <div><h3>Estimations</h3><p>Ventes et revenu par produit sur 7, 30 et 90 jours, puis scores des mots-clés et des niches.</p></div>
+    </div>
+
+    <div class="section">
+      <h2>Estimer les ventes de chaque produit</h2>
+      <p class="lede">Etsy ne publie pas les ventes par produit. Il publie deux choses qui permettent de les reconstruire : le total exact des ventes de chaque boutique, et des avis datés rattachés à un produit.</p>
+      <div class="cards2">
+        <div class="card">
+          <h3>Méthode 1 · par les avis</h3>
+          <p>Disponible dès le premier jour, car Etsy donne 90 jours d'avis datés. Chaque boutique a son propre ratio ventes/avis, calculé sur toute sa vie.</p>
+          <div class="formula">K = ventes totales boutique ÷ avis totaux boutique
+ventes produit = avis du produit sur la période × K</div>
+        </div>
+        <div class="card">
+          <h3>Méthode 2 · par l'évolution de la boutique</h3>
+          <p>Disponible après 7 jours de relevés. La hausse du compteur de ventes de la boutique donne ses ventes réelles, réparties ensuite entre ses produits.</p>
+          <div class="formula">ventes boutique = compteur(aujourd'hui) − compteur(J−7)
+part produit = 60 % avis récents + 25 % favoris gagnés + 15 % vues gagnées</div>
+        </div>
+      </div>
+      <div class="example">
+        <h3>Exemple</h3>
+        <ol>
+          <li>La boutique PaperAndVows affiche 12 480 ventes et 1 040 avis au total, donc K = 12 ventes par avis.</li>
+          <li>Son « Wedding Planner Bundle » a reçu 34 avis ces 30 derniers jours, soit 34 × 12 = 408 ventes estimées.</li>
+          <li>Après une semaine de relevés, le compteur de la boutique a pris 118 ventes et ce produit pèse 82 % de l'activité, soit 97 ventes cette semaine, environ 415 par mois.</li>
+          <li>Les deux méthodes concordent, donc l'estimation finale est d'environ 412 ventes par mois, confiance haute, revenu estimé 412 × 12,99 $ ≈ 5 350 $.</li>
+        </ol>
+      </div>
+      <p class="lede" style="margin-top:14px">Les chiffres absolus peuvent être faux de ±30 à 50 %, comme chez EverBee. Le classement, lui, est fiable : c'est ce qui sert à choisir une niche. Chaque estimation porte un niveau de confiance (haute, moyenne, basse).</p>
+    </div>
+
+    <div class="section">
+      <h2>Quand les chiffres deviennent fiables</h2>
+      <div class="maturity" style="margin-top:14px">
+        <div class="done"><b>Jour 1</b>Classement par les avis des 90 derniers jours. Utilisable tout de suite.</div>
+        <div class="done"><b>Jour 7</b>Les ventes réelles des boutiques s'ajoutent. La confiance monte.</div>
+        <div><b>Jour 30</b>Tendances fiables sur 30 jours (favoris, vues, ventes boutique).</div>
+        <div><b>Jour 90</b>Historique complet, comparaison d'un trimestre à l'autre.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Scores d'un mot-clé ou d'une niche</h2>
+      <div class="cards2">
+        <div class="card"><h3>Demande</h3><p>Ventes estimées cumulées des 48 premiers produits digitaux, nombre de produits à plus de 30 ventes par mois, volume Google (Semrush).</p></div>
+        <div class="card"><h3>Concurrence</h3><p>Nombre total d'annonces, part du revenu tenue par les 3 plus grosses boutiques, poids des boutiques à plus de 5 000 ventes, nombre d'avis des leaders.</p></div>
+        <div class="card"><h3>Porte ouverte</h3><p>Produits de moins d'un an qui vendent déjà plus de 10 par mois, et boutiques de moins d'un an en première page. C'est la preuve qu'un nouveau peut entrer.</p></div>
+        <div class="card"><h3>Opportunité et verdict</h3><p>Demande pondérée par l'inverse de la concurrence, plus un bonus de porte ouverte. Verdict : Foncer, À creuser ou Éviter.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ API ============ -->
+  <section class="panel" id="p-api" role="tabpanel" aria-labelledby="t-api" hidden>
+    <h2>Ton accès à l'API Etsy</h2>
+    <p class="lede">Analyse faite sur la spécification officielle Open API v3 et sur trois tests réels avec ta clé et ton secret, le 16 octobre 2026, sur le mot-clé « wedding planner template ».</p>
+    <div class="status" id="apistatus">
+      <div><span>App</span><b>niche-keyword-research</b></div>
+      <div><span>Statut</span><b>Personal Access</b></div>
+      <div><span>Limites</span><b>5 /s · 5 000 /jour</b></div>
+      <div><span>Test en direct</span><b id="probe-state"><i class="dot" style="background:var(--good)"></i>Réussi · 25 appels</b></div>
+    </div>
+
+    <div class="section">
+      <h2>Ce qu'on a appris en testant</h2>
+      <ul class="nos" id="findings">
+        <li><b>La clé seule ne suffit plus.</b> Etsy répond <span class="mono">403 Shared secret is required</span>. Chaque appel doit envoyer <span class="mono">x-api-key: keystring:shared_secret</span>. Ton outil actuel n'envoie que la clé, il faut le corriger.</li>
+        <li><b>Toutes les données utiles sont publiques.</b> Recherche, détails des annonces, boutiques et avis marchent avec la clé seule, sans connexion OAuth.</li>
+        <li><b>Un appel groupé donne presque tout.</b> L'endpoint <span class="mono">/listings/batch</span> rafraîchit 100 annonces d'un coup, avec la boutique et ses ventes totales incluses. Suivre 20 000 produits coûte environ 200 appels par jour.</li>
+        <li><b>Pas de filtre « digital » dans la recherche.</b> On filtre après coup sur <span class="mono">listing_type = download</span>, et on écarte les mots-clés à moins de 50 % de digital. Les mots-clés avec « template » ou « printable » sont déjà presque 100 % digitaux.</li>
+        <li><b>L'ordre de l'API n'est pas la première page d'Etsy.</b> Les 10 premiers résultats avaient 0, 0, 1, 39, 19, 0, 7 024, 0, 26 et 0 favoris. Les trois best-sellers étaient aux positions 6, 85 et 171. L'outil va donc chercher 500 résultats et les classe lui-même selon les ventes estimées.</li>
+        <li><b>Le ratio ventes/avis est gratuit.</b> Le nombre d'avis de la boutique est en fait le total à vie, malgré la doc. Le ratio K se calcule donc dès le premier jour, sans appel en plus. Mesuré sur trois grosses boutiques digitales : 15,8, 11,7 et 11,2 ventes par avis.</li>
+        <li><b>Les favoris et les vues sont dans les résultats de recherche.</b> On peut trier les candidats sans dépenser d'appels supplémentaires.</li>
+        <li><b>Maximum environ 10 000 résultats par mot-clé.</b> Au-delà, Etsy refuse la pagination.</li>
+        <li><b>Un ordre de grandeur réel.</b> La plus grosse boutique de cette niche, PrioriDigitalStudio, a 177 415 ventes et a reçu 119 avis en 30 jours, soit environ 1 900 ventes estimées par mois sur 35 produits.</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Endpoints utilisés</h2>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="doc-tbl">
+        <thead><tr><th>Endpoint</th><th>Ce qu'il donne</th><th>Coût</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">/listings/active</td><td>Recherche par mot-clé : nombre total d'annonces concurrentes et 100 résultats par page. Tri possible par pertinence, date ou prix seulement.</td><td>1 appel / 100</td></tr>
+          <tr><td class="mono">/listings/batch</td><td>100 annonces : favoris, vues, prix, images et objet boutique (ventes totales, âge, nombre d'annonces digitales).</td><td>1 appel / 100</td></tr>
+          <tr><td class="mono">/shops/{id}/reviews</td><td>Avis datés de toute la boutique, chacun lié à son produit. Le champ <span class="mono">count</span> donne le total à vie.</td><td>1 appel / 100 avis</td></tr>
+          <tr><td class="mono">/listings/{id}/reviews</td><td>Avis d'un seul produit, filtrables par date.</td><td>1 appel / produit</td></tr>
+          <tr><td class="mono">/shops/{id}/listings/active</td><td>Tous les produits d'une boutique, pour découvrir le catalogue d'un vendeur qui marche.</td><td>1 appel / 100</td></tr>
+          <tr><td class="mono">/buyer-taxonomy/nodes</td><td>L'arbre des catégories Etsy.</td><td>1 appel, mis en cache</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="section">
+      <h2>Ce que l'API ne donne pas</h2>
+      <ul class="nos">
+        <li><b>Les ventes par produit.</b> On les estime (voir Fonctionnement).</li>
+        <li><b>Un classement « best-sellers » ou « tendances ».</b> On le construit nous-mêmes à partir des relevés quotidiens.</li>
+        <li><b>L'historique.</b> Seulement les valeurs du jour, d'où la collecte quotidienne. Exception : les avis sont datés, donc 90 jours d'historique dès le départ.</li>
+        <li><b>Le volume de recherche sur Etsy, les clics et l'autocomplétion Etsy.</b> On les remplace par le volume et la tendance Google via Semrush, et l'autocomplétion Google.</li>
+                      </ul>
+    </div>
+
+    <div class="section">
+      <h2>Budget quotidien de 5 000 appels</h2>
+      <div class="tbl-wrap" style="margin-top:12px"><table class="doc-tbl">
+        <thead><tr><th>Poste</th><th class="r">Appels</th><th>Pourquoi</th></tr></thead>
+        <tbody>
+          <tr><td>Rafraîchir les produits suivis</td><td class="r num">≈ 200</td><td>20 000 produits par lots de 100, boutiques incluses</td></tr>
+          <tr><td>Nouveaux avis par boutique</td><td class="r num">≈ 2 000</td><td>Environ 1 500 boutiques, les plus actives d'abord</td></tr>
+          <tr><td>Découverte (recherches, catalogues)</td><td class="r num">≈ 1 000</td><td>Trouver de nouveaux produits et mots-clés</td></tr>
+          <tr><td>Nouvelles boutiques</td><td class="r num">≈ 1 000</td><td>90 jours d'avis pour chaque nouvelle boutique (le ratio K est déjà fourni)</td></tr>
+          <tr><td>Réserve pour tes analyses</td><td class="r num">800</td><td>Jamais utilisée par la collecte automatique</td></tr>
+        </tbody>
+      </table></div>
+      <p class="lede" style="margin-top:12px">Une analyse de mot-clé coûte 60 à 90 appels, donc la réserve permet environ 10 analyses par jour en plus de la collecte. Le statut Personal Access suffit pour un usage local. Pour en faire un SaaS public plus tard, il faudrait demander le Commercial Access à Etsy.</p>
+    </div>
+  </section>
+
+  <!-- ============ CODEX ============ -->
+  <section class="panel" id="p-codex" role="tabpanel" aria-labelledby="t-codex" hidden>
+    <h2>Brief pour Codex</h2>
+    <p class="lede">Codex part de ton dépôt existant <span class="mono">GamalMehI/etsy-keyword-tool</span>. Il est sur GitHub, pas GitLab. Avant de lancer Codex, il faut ajouter ces fichiers au dépôt.</p>
+    <div class="files">
+      <div><code>docs/niche-finder/SPEC.md</code><br>Spécification complète : données, formules, budget, écrans, critères d'acceptation.</div>
+      <div><code>docs/niche-finder/mockups.html</code><br>Cette page, comme référence visuelle.</div>
+      <div><code>scripts/api-probe.mjs</code> + <code>docs/niche-finder/api-probe-result.json</code><br>Le script de test de l'API et les résultats réels du 16 octobre.</div>
+    </div>
+    <div class="prompt">
+      <button class="btn" id="copy">Copier le prompt</button>
+      <pre id="prompt-text"></pre>
+    </div>
+  </section>
+</div>
+
+<script>
+const PROMPT = `You are working in an existing repository: https://github.com/GamalMehI/etsy-keyword-tool (branch \`master\`). Clone it and build on it. Do not start a new project.
+
+## What exists
+
+A zero-dependency Node app (\`server.js\` + \`public/index.html\`) that analyzes Etsy keywords with the official Etsy Open API v3, Semrush and Google autocomplete, with a 7-day JSON cache and a mock mode (\`ETSY_MOCK=1\`). Read \`README.md\` and \`docs/\` first. Keep what works: Semrush and Google helpers, trademark blocklist, mock mode, password option.
+
+Known bug: \`etsyGet\` sends \`x-api-key: <keystring>\` only. Etsy now requires \`x-api-key: <keystring>:<shared_secret>\` and returns 403 otherwise. Add \`ETSY_SHARED_SECRET\` to \`.env.example\` and fix the header.
+
+## What to build
+
+Turn it into the **Etsy Digital Niche Finder**: a local app that finds which **digital products** sell on Etsy right now, estimates sales per product like EverBee, scores keywords for demand and competition, and ranks niches. Digital only: keep a listing only when \`listing_type === "download"\`.
+
+The full spec is in \`docs/niche-finder/SPEC.md\` and the visual reference in \`docs/niche-finder/mockups.html\`. Follow them. In short:
+
+1. SQLite storage with \`node:sqlite\` (Node 24), daily snapshots of listings and shops, timestamped reviews.
+2. An Etsy client with the correct auth header, 4 requests per second max, a persisted daily call counter, and an 800-call reserve for interactive use. The app's limit is 5,000 calls per day.
+3. Discovery from seed keywords, expansion, searches, and shop expansion. A daily collector job (\`npm run collect\`, plus an in-process schedule and a launchd plist example). A \`--bootstrap\` mode for day one.
+4. Per-product sales and revenue estimates for 7, 30 and 90 days: review-based with a per-shop sales-per-review ratio on day one, blended with shop sales deltas once snapshots exist. Each estimate has a confidence level.
+5. Keyword analyzer with demand, competition, open-door and opportunity scores, and a verdict.
+6. Niches ranking computed from the DB.
+7. A four-screen French UI matching the mockups: Produits tendance, Analyse de mot-clé, Niches, Collecte.
+
+## Rules
+
+- Official API only. Never request etsy.com web pages and never automate a browser on Etsy.
+- The API was already probed live on 2026-10-16: read "Verified live" in SPEC section 2 and \`docs/niche-finder/api-probe-result.json\`. Two findings drive the design: API search order is not Etsy's page-1 ranking (rank by our own metrics), and shop \`review_count\` is the lifetime total (K comes free from the batch call). Re-run \`node scripts/api-probe.mjs\` once to check that \`.env\` works, and write any new difference in \`docs/niche-finder/NOTES.md\`.
+- No runtime dependencies. Tests use \`node:test\`. Put the estimate and score math in pure functions and test them.
+- Label every estimated number as an estimate in the UI.
+- Never commit \`.env\` or \`data/\`.
+- Keep mock mode working with realistic fake data and 30 days of fake snapshots, so the UI can be checked without spending API calls.
+
+## Done when
+
+The acceptance criteria at the end of \`SPEC.md\` pass. Update \`README.md\` to explain setup, daily collection, how estimates work and their limits. Work on a branch named \`niche-finder\` and commit in small steps.`;
+
+const P = [
+  {t:"Wedding Planner Printable Bundle, 120 Pages",shop:"PaperAndVows",price:12.99,s:412,tr:18,fav:9840,age:410,c:3,niche:"wedding planner",hue:340,ab:"WP",tags:["wedding planner","wedding binder","bride to be gift","wedding checklist"],ss:12480,sa:4.2,sd:38},
+  {t:"Digital Budget Planner Google Sheets, Paycheck Budget",shop:"SheetSavvyCo",price:9.5,s:655,tr:42,fav:15210,age:280,c:3,niche:"budget spreadsheet",hue:150,ab:"BS",tags:["budget spreadsheet","google sheets budget","paycheck budget","finance tracker"],ss:21900,sa:2.6,sd:22},
+  {t:"ADHD Digital Planner for GoodNotes, Undated",shop:"FocusPagesStudio",price:14,s:288,tr:136,fav:3120,age:54,c:2,niche:"goodnotes planner",hue:265,ab:"AD",tags:["adhd planner","goodnotes planner","digital planner","ipad planner"],ss:1640,sa:0.7,sd:9,viral:1},
+  {t:"Baby Shower Games Bundle, 15 Printable Games",shop:"LittleConfettiCo",price:6.99,s:530,tr:-7,fav:21300,age:1240,c:3,niche:"baby shower games",hue:30,ab:"BG",tags:["baby shower games","baby shower bingo","printable games","gender neutral"],ss:48700,sa:6.1,sd:140,classic:1},
+  {t:"Teacher Lesson Plan Template 2026-2027, Editable",shop:"ClassroomCalm",price:8,s:347,tr:88,fav:5020,age:95,c:3,niche:"teacher printables",hue:200,ab:"LP",tags:["lesson plan template","teacher planner","editable planner","back to school"],ss:6210,sa:1.8,sd:17},
+  {t:"Halloween Coloring Pages for Kids, 40 Printables",shop:"InkyLittleOnes",price:3.99,s:402,tr:210,fav:1870,age:38,c:1,niche:"coloring pages",hue:22,ab:"HC",tags:["halloween coloring","kids coloring pages","printable activity","classroom halloween"],ss:2980,sa:1.1,sd:64,viral:1},
+  {t:"Resume Template for Word & Canva, Modern CV",shop:"HireReadyDesign",price:11,s:310,tr:4,fav:18900,age:1500,c:3,niche:"resume template",hue:215,ab:"CV",tags:["resume template","cv template","canva resume","word resume"],ss:30400,sa:5.4,sd:55,classic:1},
+  {t:"Boho Botanical Wall Art Set of 3, Printable",shop:"SageAndLinen",price:7.2,s:264,tr:-15,fav:11800,age:900,c:2,niche:"printable wall art",hue:95,ab:"WA",tags:["boho wall art","botanical print","printable art","gallery wall set"],ss:15200,sa:4.9,sd:310},
+  {t:"Kids Chore Chart Printable, Editable in Canva",shop:"TinyHabitsPrints",price:4.5,s:221,tr:64,fav:2890,age:72,c:2,niche:"kids chore chart",hue:175,ab:"CC",tags:["chore chart","kids routine","reward chart","canva template"],ss:1880,sa:0.9,sd:14,viral:1},
+  {t:"Highland Cow Crochet Pattern PDF, Amigurumi",shop:"WoolyMeadow",price:5.99,s:198,tr:23,fav:6110,age:330,c:1,niche:"crochet pattern",hue:48,ab:"HC",tags:["crochet pattern","amigurumi pattern","highland cow","beginner crochet"],ss:4100,sa:3.0,sd:46},
+  {t:"Notion Life Planner Template, All-in-One Dashboard",shop:"NotionNest",price:19,s:174,tr:9,fav:4470,age:520,c:2,niche:"notion template",hue:0,ab:"NT",tags:["notion template","life planner","notion dashboard","second brain"],ss:3900,sa:1.7,sd:12},
+  {t:"Small Business Bookkeeping Spreadsheet, Excel & Sheets",shop:"LedgerLane",price:24,s:136,tr:12,fav:3900,age:760,c:3,niche:"budget spreadsheet",hue:125,ab:"BK",tags:["bookkeeping spreadsheet","small business","profit and loss","excel template"],ss:5350,sa:3.3,sd:8},
+];
+const N = [
+  {n:"goodnotes planner",rev:61200,tr:48,l:1240,sh:212,pm:13.5,top3:24,newp:31,d:81,co:34,op:75,sp:[20,22,25,24,28,31,35,39,44,48,55,61]},
+  {n:"teacher printables",rev:48900,tr:71,l:1860,sh:340,pm:6.5,top3:18,newp:27,d:76,co:39,op:68,sp:[14,15,15,17,19,22,26,30,35,40,44,49]},
+  {n:"kids chore chart",rev:18400,tr:52,l:610,sh:150,pm:4.8,top3:21,newp:35,d:58,co:28,op:72,sp:[8,9,9,10,11,12,12,14,15,16,17,18]},
+  {n:"budget spreadsheet",rev:92300,tr:22,l:2110,sh:290,pm:12,top3:41,newp:14,d:88,co:62,op:38,sp:[70,72,71,74,76,79,80,83,85,88,90,92]},
+  {n:"wedding planner",rev:55100,tr:6,l:1530,sh:260,pm:11,top3:37,newp:12,d:74,co:55,op:34,sp:[50,49,52,53,51,54,53,55,54,56,55,55]},
+  {n:"crochet pattern",rev:36800,tr:15,l:4200,sh:880,pm:5.9,top3:9,newp:19,d:70,co:58,op:44,sp:[30,31,31,32,33,33,34,35,35,36,36,37]},
+  {n:"notion template",rev:21700,tr:-4,l:930,sh:180,pm:16,top3:46,newp:9,d:55,co:57,op:22,sp:[24,24,23,23,23,22,22,22,22,22,22,22]},
+  {n:"baby shower games",rev:47500,tr:-3,l:2760,sh:410,pm:6.5,top3:52,newp:6,d:79,co:71,op:15,sp:[49,48,49,48,48,47,48,47,48,47,47,47]},
+  {n:"printable wall art",rev:40100,tr:-11,l:9800,sh:2100,pm:6,top3:7,newp:4,d:68,co:83,op:8,sp:[46,45,45,44,43,43,42,42,41,41,40,40]},
+  {n:"resume template",rev:58800,tr:1,l:3300,sh:520,pm:10.5,top3:44,newp:5,d:82,co:76,op:12,sp:[58,58,59,58,58,59,58,59,59,58,59,59]},
+];
+const fmt = (n,d=0)=> n.toLocaleString('fr-FR',{maximumFractionDigits:d,minimumFractionDigits:d});
+const usd = n => fmt(n, n<100?2:0)+' $';
+const opp = x => Math.round(x.d*(1-x.co/100)*0.8 + x.op*0.2);
+const verdict = x => { const o=opp(x); return o>=50&&x.d>=40&&x.op>=25?['Foncer','v-go']:o>=35?['À creuser','v-dig']:['Éviter','v-no']; };
+const thumb = p => `<div class="thumb" style="background:linear-gradient(135deg,hsl(${p.hue} 55% 52%),hsl(${(p.hue+40)%360} 50% 38%))">${p.ab}</div>`;
+const confHtml = l => `<span class="conf" data-l="${l}"><i><b></b><b></b><b></b></i>${['','Basse','Moyenne','Haute'][l]}</span>`;
+const ageTxt = d => d<60? d+' j' : d<730? Math.round(d/30)+' mois' : fmt(d/365,1)+' ans';
+function spark(vals,w=90,h=24,color='var(--accent)',fill=true){
+  const mx=Math.max(...vals),mn=Math.min(...vals),r=mx-mn||1;
+  const pts=vals.map((v,i)=>[i*(w-4)/(vals.length-1)+2,h-3-(v-mn)/r*(h-6)]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const last=pts[pts.length-1];
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true">${fill?`<path d="${d} L${last[0]} ${h} L2 ${h}Z" fill="${color}" opacity=".12"/>`:''}<path d="${d}" fill="none" stroke="${color}" stroke-width="1.6"/><circle cx="${last[0]}" cy="${last[1]}" r="2.4" fill="${color}"/></svg>`;
+}
+function rng(seed){return ()=>((seed=(seed*16807)%2147483647)/2147483647);}
+
+let period = 30, open = null, screen = 'hot';
+function periodVal(p){ const f = period===7? 7/30*(1+p.tr/250) : period===90? 3*(1-p.tr/400) : 1; return p.s*f; }
+
+function hotScreen(){
+  const rows = P.map(p=>({...p,v:periodVal(p)})).sort((a,b)=>b.v*b.price-a.v*a.price);
+  const total = rows.reduce((a,p)=>a+p.v*p.price,0);
+  return `<div class="screen-head"><div><p class="eyebrow">Produits digitaux · classés par revenu estimé</p><h2>Produits tendance</h2></div>
+    <div class="seg" role="group" aria-label="Période">${[7,30,90].map(d=>`<button data-period="${d}" aria-pressed="${d===period}">${d}j</button>`).join('')}</div></div>
+  <div class="strip">
+    <div><span class="s">Produits suivis</span><div class="v">18 420</div></div>
+    <div><span class="s">Revenu affiché, ${period} j <span class="est">est.</span></span><div class="v">${usd(total)}</div></div>
+    <div><span class="s">Viraux (moins de 90 j)</span><div class="v">${period===7?41:period===30?64:112}</div></div>
+    <div><span class="s">Historique collecté</span><div class="v">12 jours</div></div>
+  </div>
+  <div class="filters">
+    <span class="chip"><span>Niche</span>Toutes ▾</span>
+    <span class="chip"><span>Prix</span>0 – 50 $ ▾</span>
+    <span class="chip"><span>Âge</span>Tous ▾</span>
+    <span class="chip"><span>Confiance min.</span>Basse ▾</span>
+    <span class="search">Rechercher un titre, une boutique, un tag…</span>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Produit</th><th class="r">Prix</th><th class="r">Ventes ${period} j</th><th class="r">Revenu ${period} j</th><th class="r">Tendance</th><th class="r">Favoris</th><th class="r">Âge</th><th>Confiance</th></tr></thead>
+    <tbody>${rows.map(p=>`<tr data-i="${P.indexOf(P.find(x=>x.t===p.t))}" tabindex="0">
+      <td><div class="prod">${thumb(p)}<div style="min-width:0"><div class="ptitle">${p.t}${p.viral?'<span class="badge b-viral">Viral</span>':''}${p.classic?'<span class="badge b-classic">Classique</span>':''}</div><div class="pshop">${p.shop} · ${p.niche}</div></div></div></td>
+      <td class="r num">${usd(p.price)}</td>
+      <td class="r num">${fmt(p.v)}<span class="est">est.</span></td>
+      <td class="r num">${usd(p.v*p.price)}<span class="est">est.</span></td>
+      <td class="r num ${p.tr>=0?'up':'down'}">${p.tr>=0?'+':''}${period===90?Math.round(p.tr*.6):period===7?Math.round(p.tr*1.3):p.tr} %</td>
+      <td class="r num">${fmt(p.fav)}</td>
+      <td class="r num">${ageTxt(p.age)}</td>
+      <td>${confHtml(p.c)}</td></tr>`).join('')}</tbody></table></div>
+  ${open!==null?drawer(P[open]):''}`;
+}
+
+function drawer(p){
+  const r=rng(p.s*7+3), days=period, base=periodVal(p)/days;
+  const sales=Array.from({length:days},(_,i)=>Math.max(0,base*(1+ (p.tr/100)*(i/days-.5))*(.55+r()*.9)));
+  const favs=[]; let f=p.fav-p.fav*0.04*days/30; for(let i=0;i<days;i++){f+=p.fav*0.04/30*(.6+r()*.8);favs.push(f);}
+  const W=380,H=130,bw=(W-30)/days, mx=Math.max(...sales)*1.1, fmn=Math.min(...favs), fmx=Math.max(...favs);
+  const bars=sales.map((v,i)=>`<rect x="${26+i*bw+bw*.15}" y="${H-18-v/mx*(H-28)}" width="${bw*.7}" height="${v/mx*(H-28)}" rx="1" fill="var(--accent)" opacity=".85"/>`).join('');
+  const line=favs.map((v,i)=>(i?'L':'M')+(26+i*bw+bw/2).toFixed(1)+' '+(H-18-(v-fmn)/(fmx-fmn||1)*(H-28)).toFixed(1)).join(' ');
+  const ticks=[0,.5,1].map(t=>`<text x="22" y="${H-18-t*(H-28)+3}" text-anchor="end">${Math.round(mx*t)}</text><line x1="26" x2="${W-4}" y1="${H-18-t*(H-28)}" y2="${H-18-t*(H-28)}" stroke="var(--line)"/>`).join('');
+  return `<aside class="drawer" aria-label="Fiche produit"><button class="close" data-close aria-label="Fermer">✕</button>
+    <div class="hero" style="background:linear-gradient(135deg,hsl(${p.hue} 55% 52%),hsl(${(p.hue+40)%360} 50% 36%))">${p.ab}</div>
+    <div><h3>${p.t}</h3><p class="pshop" style="margin-top:4px">${p.shop} · <span style="color:var(--accent);font-weight:600">Voir sur Etsy ↗</span></p></div>
+    <div class="kv">
+      <div><b>${fmt(p.s)}</b><span>ventes/mois est.</span></div>
+      <div><b>${usd(p.s*p.price)}</b><span>revenu/mois est.</span></div>
+      <div><b>${confHtml(p.c)}</b><span>confiance</span></div>
+    </div>
+    <div><p class="eyebrow" style="margin-bottom:6px">Ventes estimées par jour · ${days} jours</p>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Ventes estimées par jour">${ticks}${bars}<path d="${line}" fill="none" stroke="var(--hot)" stroke-width="1.8"/><text x="26" y="${H-4}">J−${days}</text><text x="${W-4}" y="${H-4}" text-anchor="end">aujourd'hui</text></svg>
+      <div class="legend"><span><i style="background:var(--accent)"></i>ventes/jour est.</span><span><i style="background:var(--hot)"></i>favoris cumulés</span></div></div>
+    <div><p class="eyebrow" style="margin-bottom:6px">Boutique</p>
+      <div class="kv"><div><b>${fmt(p.ss)}</b><span>ventes totales</span></div><div><b>${fmt(p.sa,1)} ans</b><span>âge</span></div><div><b>${p.sd}</b><span>produits digitaux</span></div></div></div>
+    <div><p class="eyebrow" style="margin-bottom:6px">Tags · cliquer pour analyser</p><div class="tags">${p.tags.map(t=>`<span class="tag">${t}<em>Analyser</em></span>`).join('')}</div></div>
+    <p class="pshop">Méthode : avis × K boutique (K = 12) mélangés avec l'évolution des ventes de la boutique sur 12 jours.</p>
+  </aside>`;
+}
+
+function kwScreen(){
+  const x={d:81,co:34,op:75}, o=opp(x), v=verdict(x);
+  const g=[6800,7100,7400,7300,8000,8600,9100,9400,10200,10900,11600,12100];
+  const top=[P[2],{...P[2],t:"ADHD Daily Planner Printable & GoodNotes, Dopamine Menu",shop:"BrainKindPlanners",s:236,price:9,age:140,c:2,hue:290,ab:"DM",fav:2410,tr:58},{...P[2],t:"Undated ADHD Digital Planner, Hyperlinked Tabs, Notability",shop:"NeuroNest",s:198,price:12,age:300,c:3,hue:250,ab:"NN",fav:4100,tr:21},{...P[2],t:"ADHD Cleaning Checklist & Routine Planner",shop:"CalmChaosHome",s:121,price:5.5,age:64,c:1,hue:160,ab:"CL",fav:880,tr:94}];
+  const subs=[["adhd planner printable",61],["adhd daily planner",54],["adhd planner for adults",49],["adhd cleaning checklist",46],["adhd planner notion",38],["adhd budget planner",33]];
+  return `<div class="screen-head"><div><p class="eyebrow">Mot-clé ou niche</p><h2>Analyse de mot-clé</h2></div></div>
+  <div class="kwbar"><span class="search">adhd planner goodnotes</span><button class="btn">Analyser</button></div>
+  <div class="verdict"><span class="pill">${v[0]}</span><p>Forte demande, concurrence modérée, et 9 produits de moins d'un an vendent déjà plus de 10 par mois. Coût de l'analyse : 112 appels API.</p></div>
+  <div class="scores">
+    ${[['Demande',x.d,'var(--accent)','≈ 4 900 ventes/mois sur les 48 premiers'],['Concurrence',x.co,'var(--warn)','8 940 annonces · top 3 = 31 % du revenu'],['Porte ouverte',x.op,'var(--good)','9 produits récents qui vendent · 4 boutiques < 1 an'],['Opportunité',o,'var(--hot)','sur 100']].map(s=>`<div class="score"><span class="eyebrow">${s[0]}</span><div class="v">${s[1]}<small> /100</small></div><div class="meter"><i style="width:${s[1]}%;background:${s[2]}"></i></div><p>${s[3]}</p></div>`).join('')}
+  </div>
+  <div class="two">
+    <div class="box"><h3>Chiffres clés</h3><div class="facts">
+      <div><b>12 100</b><span>recherches Google/mois</span></div>
+      <div><b class="up">+78 %</b><span>sur 12 mois</span></div>
+      <div><b>97 %</b><span>des résultats sont digitaux</span></div>
+      <div><b>11,50 $</b><span>prix médian</span></div>
+      <div><b>3 – 29 $</b><span>fourchette de prix</span></div>
+      <div><b>1,4 an</b><span>âge médian du top 48</span></div></div>
+      <div style="margin-top:12px"><p class="eyebrow" style="margin-bottom:4px">Volume Google, 12 mois</p>${spark(g,300,46)}</div></div>
+    <div class="box"><h3>Sous-mots-clés</h3><ul class="subkw">${subs.map(s=>`<li><span>${s[0]}</span><span class="mini"><i style="width:${s[1]}%"></i></span><button class="link">Analyser</button></li>`).join('')}</ul></div>
+  </div>
+  <div class="box" style="margin-bottom:14px"><h3>Meilleurs produits digitaux pour ce mot-clé</h3>
+    <div class="tbl-wrap"><table><thead><tr><th>Produit</th><th class="r">Prix</th><th class="r">Ventes/mois</th><th class="r">Revenu/mois</th><th class="r">Âge</th><th>Confiance</th></tr></thead><tbody>
+    ${top.map(p=>`<tr><td><div class="prod">${thumb(p)}<div style="min-width:0"><div class="ptitle">${p.t}</div><div class="pshop">${p.shop}</div></div></div></td><td class="r num">${usd(p.price)}</td><td class="r num">${fmt(p.s)}<span class="est">est.</span></td><td class="r num">${usd(p.s*p.price)}<span class="est">est.</span></td><td class="r num">${ageTxt(p.age)}</td><td>${confHtml(p.c)}</td></tr>`).join('')}
+    </tbody></table></div></div>
+  <div class="box"><h3>Faille de qualité · avis 1 à 3 étoiles des 2 leaders</h3>
+    <p class="quote">"Hyperlinks stop working after the first month tab in Notability."<span>2★ · FocusPagesStudio · avis d'exemple</span></p>
+    <p class="quote">"Too many pages, I can't find today's page quickly. Needs a simpler daily view."<span>3★ · BrainKindPlanners · avis d'exemple</span></p>
+  </div>`;
+}
+
+function nicheScreen(){
+  const rows=[...N].sort((a,b)=>opp(b)-opp(a));
+  const bar=(v,c)=>`<span><i style="width:${v}%;background:${c}"></i></span>`;
+  return `<div class="screen-head"><div><p class="eyebrow">Familles de produits digitaux · classées par opportunité</p><h2>Niches</h2></div>
+    <div class="seg" role="group" aria-label="Période">${[7,30,90].map(d=>`<button data-period="${d}" aria-pressed="${d===period}">${d}j</button>`).join('')}</div></div>
+  <div class="tbl-wrap"><table>
+  <thead><tr><th>Niche</th><th>Revenu 12 sem.</th><th class="r">Revenu/mois</th><th class="r">Tendance</th><th class="r">Produits</th><th class="r">Prix médian</th><th class="r">Top 3</th><th class="r">Nouveaux qui vendent</th><th>Dem · Conc · Porte</th><th class="r">Opp.</th><th>Verdict</th></tr></thead>
+  <tbody>${rows.map(x=>{const v=verdict(x);return `<tr data-niche="${x.n}"><td style="font-weight:600">${x.n}</td><td>${spark(x.sp,90,24,x.tr>=0?'var(--accent)':'var(--bad)')}</td><td class="r num">${usd(x.rev)}<span class="est">est.</span></td><td class="r num ${x.tr>=0?'up':'down'}">${x.tr>=0?'+':''}${x.tr} %</td><td class="r num">${fmt(x.l)}</td><td class="r num">${usd(x.pm)}</td><td class="r num">${x.top3} %</td><td class="r num">${x.newp} %</td><td><span class="bars">${bar(x.d,'var(--accent)')}${bar(x.co,'var(--warn)')}${bar(x.op,'var(--good)')}</span></td><td class="r num" style="font-weight:600">${opp(x)}</td><td><span class="vpill ${v[1]}">${v[0]}</span></td></tr>`}).join('')}</tbody></table></div>
+  <p class="pshop" style="margin-top:10px">Cliquer sur une niche ouvre « Produits tendance » filtré sur cette niche. Barres : demande (vert foncé), concurrence (ambre), porte ouverte (vert).</p>`;
+}
+
+function collectScreen(){
+  const seg=[[214,'var(--accent)','Rafraîchir les produits'],[1930,'var(--hot)','Nouveaux avis'],[980,'var(--warn)','Découverte'],[288,'var(--good)','Nouvelles boutiques']];
+  return `<div class="screen-head"><div><p class="eyebrow">Collecte quotidienne · 06:00</p><h2>Collecte</h2></div><div style="display:flex;gap:8px"><button class="btn ghost">Modifier l'heure</button><button class="btn">Lancer maintenant</button></div></div>
+  <div class="quota-big"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><h3>Appels API aujourd'hui</h3><span class="num"><b>3 412</b> / 5 000 · reste 1 588</span></div>
+    <div class="qtrack">${seg.map(s=>`<i style="width:${s[0]/50}%;background:${s[1]}"></i>`).join('')}<span class="qreserve" title="Réserve analyses"></span></div>
+    <div class="qlegend">${seg.map(s=>`<span><i style="background:${s[1]}"></i>${s[2]} · <span class="num">${fmt(s[0])}</span></span>`).join('')}<span><i style="background:var(--sunk);outline:1px dashed var(--muted)"></i>Réserve pour tes analyses · <span class="num">800</span></span></div></div>
+  <div class="strip">
+    <div><span class="s">Produits digitaux suivis</span><div class="v">18 420</div></div>
+    <div><span class="s">Boutiques</span><div class="v">1 362</div></div>
+    <div><span class="s">Avis enregistrés</span><div class="v">241 880</div></div>
+    <div><span class="s">Dernière collecte</span><div class="v" style="color:var(--good)">06:41 ✓</div></div>
+  </div>
+  <div class="two">
+    <div class="box"><h3>Fiabilité des estimations</h3><p class="pshop">Jour 12 de collecte</p>
+      <div class="maturity"><div class="done"><b>J1</b>Avis 90 j</div><div class="done"><b>J7</b>Ventes boutiques</div><div class="now"><b>J30</b>Tendances 30 j</div><div><b>J90</b>Historique complet</div></div></div>
+    <div class="box"><h3>Mots-clés de départ</h3><label for="seeds" class="pshop">Un par ligne. Les produits physiques sont ignorés.</label>
+      <textarea id="seeds">digital planner
+goodnotes planner
+budget spreadsheet
+notion template
+teacher printables
+kids chore chart
+crochet pattern
+wedding planner printable
+baby shower games printable
+resume template</textarea></div>
+  </div>`;
+}
+
+function render(){
+  const el=document.getElementById('screen');
+  el.innerHTML = screen==='hot'?hotScreen(): screen==='kw'?kwScreen(): screen==='niches'?nicheScreen(): collectScreen();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
+  screen=b.dataset.screen; open=null;
+  document.querySelectorAll('.nav button').forEach(x=>x.setAttribute('aria-selected',x===b)); render();
+}));
+document.getElementById('screen').addEventListener('click',e=>{
+  const pb=e.target.closest('[data-period]'); if(pb){period=+pb.dataset.period; render(); return;}
+  if(e.target.closest('[data-close]')){open=null; render(); return;}
+  if(e.target.closest('.drawer')) return;
+  const tr=e.target.closest('tr[data-i]'); if(tr){open=+tr.dataset.i; render(); return;}
+  const nr=e.target.closest('tr[data-niche]'); if(nr){screen='hot'; open=null; document.querySelectorAll('.nav button').forEach(x=>x.setAttribute('aria-selected',x.dataset.screen==='hot')); render();}
+});
+document.getElementById('screen').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const tr=e.target.closest('tr[data-i]'); if(tr){open=+tr.dataset.i; render();}}
+  if(e.key==='Escape'&&open!==null){open=null; render();}
+});
+document.querySelectorAll('.doctabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.doctabs button').forEach(x=>{x.setAttribute('aria-selected',x===b); document.getElementById(x.getAttribute('aria-controls')).hidden = x!==b;});
+}));
+document.getElementById('prompt-text').textContent = PROMPT;
+document.getElementById('copy').addEventListener('click',async e=>{
+  const btn=e.currentTarget;
+  try{ await navigator.clipboard.writeText(PROMPT); btn.textContent='Copié'; }
+  catch{ const r=document.createRange(); r.selectNodeContents(document.getElementById('prompt-text')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent='Texte sélectionné, Cmd+C'; }
+  setTimeout(()=>btn.textContent='Copier le prompt',2200);
+});
+render();
+</script>

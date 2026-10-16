@@ -1,0 +1,694 @@
+{
+  "keyword": "wedding planner template",
+  "at": "2026-10-16T15:52:07.015Z",
+  "calls": [
+    {
+      "path": "/openapi-ping",
+      "status": 200,
+      "ms": 420,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165927.39",
+        "x-etsy-request-uuid": "EunH4F_bpGfQ6RTyMa1JLZRkyN1f",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4999",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165927.285784,VS0,VE150"
+      }
+    },
+    {
+      "path": "/buyer-taxonomy/nodes",
+      "status": 200,
+      "ms": 2031,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165929.6",
+        "x-etsy-request-uuid": "EuA8OUFyjbd4nfMOPttA-G4Ri1e4",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "3",
+        "x-remaining-today": "4998",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165928.750217,VS0,VE1916"
+      }
+    },
+    {
+      "path": "/listings/active",
+      "status": 200,
+      "ms": 1843,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165931.47",
+        "x-etsy-request-uuid": "Eu1lAnTZIKcW1C6vN0sRnHHrfnbf",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4997",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165930.033687,VS0,VE1499"
+      }
+    },
+    {
+      "path": "/listings/batch",
+      "status": 200,
+      "ms": 733,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165932.68",
+        "x-etsy-request-uuid": "Euw3ViOS17VhmcOHrki9HPWRPA51",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4996",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165932.128224,VS0,VE610"
+      }
+    },
+    {
+      "path": "/shops/51112273/reviews",
+      "status": 200,
+      "ms": 201,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165933.2",
+        "x-etsy-request-uuid": "EuT32Hv5D2bEUvztdI9MxN4aAQf5",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4995",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165933.113044,VS0,VE141"
+      }
+    },
+    {
+      "path": "/listings/1785440881/reviews",
+      "status": 200,
+      "ms": 217,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165933.67",
+        "x-etsy-request-uuid": "EuRSTS5iWQ28wyMQTAOjG7a_Xtb0",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "3",
+        "x-remaining-today": "4994",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165934.565979,VS0,VE155"
+      }
+    },
+    {
+      "path": "/shops/51112273/listings/active",
+      "status": 200,
+      "ms": 1989,
+      "limits": {
+        "x-cache": "MISS",
+        "x-cache-hits": "0",
+        "x-etsy-generated": "1792165935.87",
+        "x-etsy-request-uuid": "EujSXz6qbwJg_S3CnyRsZTV5pw44",
+        "x-limit-per-day": "5000",
+        "x-limit-per-second": "5",
+        "x-remaining-this-second": "4",
+        "x-remaining-today": "4993",
+        "x-served-by": "cache-toj-leto2350035-TOJ",
+        "x-timer": "S1792165934.035276,VS0,VE1892"
+      }
+    }
+  ],
+  "taxonomy": {
+    "total_nodes": 4509,
+    "digital_like": [
+      {
+        "id": 77,
+        "level": 2,
+        "path": "Art & Collectibles > Drawing & Illustration > Digital"
+      },
+      {
+        "id": 2078,
+        "level": 2,
+        "path": "Art & Collectibles > Prints > Digital Prints"
+      },
+      {
+        "id": 2857,
+        "level": 2,
+        "path": "Books, Movies & Music > Books > Calendars & Planners"
+      },
+      {
+        "id": 12318,
+        "level": 3,
+        "path": "Books, Movies & Music > Music > Recorded Audio > Digital Music"
+      },
+      {
+        "id": 8039,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Home & Hobby > Doll & Model Making > Doll Making > Kits & How To > Doll Clothes Patterns"
+      },
+      {
+        "id": 8038,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Home & Hobby > Doll & Model Making > Doll Making > Kits & How To > Dollmaking Patterns"
+      },
+      {
+        "id": 7265,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Home & Hobby > Woodworking & Carpentry > Kits & How To > Blueprints & Patterns"
+      },
+      {
+        "id": 7372,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Jewelry & Beauty > Jewelry Making & Beading > Kits & How To > Patterns"
+      },
+      {
+        "id": 8315,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Kids' Crafts > Knitting, Knotting & Crochet > Patterns"
+      },
+      {
+        "id": 7663,
+        "level": 6,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Papercraft > Card Making & Stationery > Materials > Embellishments > Clip Art & Image Files"
+      },
+      {
+        "id": 9373,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Papercraft > Card Making & Stationery > Materials > Templates"
+      },
+      {
+        "id": 7620,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Papercraft > Origami > Patterns & Tutorials"
+      },
+      {
+        "id": 8596,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Papercraft > Scrapbooking > Embellishments > Clip Art & Image Files"
+      },
+      {
+        "id": 7630,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Paper, Party & Kids > Papercraft > Scrapbooking > Templates"
+      },
+      {
+        "id": 7784,
+        "level": 3,
+        "path": "Craft Supplies & Tools > Sculpting & Forming > 3D Printing > Patterns"
+      },
+      {
+        "id": 7853,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sculpting & Forming > Glass Art > Stained Glass > Kits & How To > Patterns & Tutorials"
+      },
+      {
+        "id": 7219,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sculpting & Forming > Mosaic Making > Kits & How To > Patterns & Tutorials"
+      },
+      {
+        "id": 7192,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Crochet > Kits & How To > Patterns"
+      },
+      {
+        "id": 7199,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Knitting > Kits & How To > Patterns"
+      },
+      {
+        "id": 7212,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Macrame > Kits & How To > Patterns"
+      },
+      {
+        "id": 7179,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Rug Making > Kits & How To > Patterns"
+      },
+      {
+        "id": 7877,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Crewel > Kits & How To > Patterns"
+      },
+      {
+        "id": 7889,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Cross Stitch > Kits & How To > Patterns"
+      },
+      {
+        "id": 7908,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Embroidery > Kits & How To > Patterns"
+      },
+      {
+        "id": 7923,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Felting > Kits & How To > Patterns"
+      },
+      {
+        "id": 7939,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Needlepoint > Kits & How To > Patterns"
+      },
+      {
+        "id": 9303,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Plastic Canvas > Kits & How To > Patterns"
+      },
+      {
+        "id": 7949,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Quilting > Kits & How To > Patterns"
+      },
+      {
+        "id": 7962,
+        "level": 5,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Sewing & Needlecraft > Sewing > Kits & How To > Patterns"
+      },
+      {
+        "id": 7185,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Sewing & Fiber > Weaving & Tapestry > Kits & How To > Patterns"
+      },
+      {
+        "id": 7124,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Visual Arts > Calligraphy > Kits & How To > Patterns"
+      },
+      {
+        "id": 8028,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Visual Arts > Collage > Tools > Templates"
+      },
+      {
+        "id": 7132,
+        "level": 3,
+        "path": "Craft Supplies & Tools > Visual Arts > Drawing & Drafting > Stencils & Templates"
+      },
+      {
+        "id": 8106,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Visual Arts > Painting > Kits & How To > Patterns"
+      },
+      {
+        "id": 8803,
+        "level": 4,
+        "path": "Craft Supplies & Tools > Visual Arts > Painting > Tools > Stencils & Templates"
+      },
+      {
+        "id": 354,
+        "level": 2,
+        "path": "Paper & Party Supplies > Paper > Calendars & Planners"
+      },
+      {
+        "id": 6098,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Calendars & Planners > Advent Calendars"
+      },
+      {
+        "id": 12426,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Calendars & Planners > Desk Calendars"
+      },
+      {
+        "id": 12427,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Calendars & Planners > Pocket Calendars"
+      },
+      {
+        "id": 12428,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Calendars & Planners > Wall Calendars"
+      },
+      {
+        "id": 1294,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Invitations & Announcements > Invitation Templates"
+      },
+      {
+        "id": 1305,
+        "level": 3,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates"
+      },
+      {
+        "id": 12472,
+        "level": 4,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Flashcards"
+      },
+      {
+        "id": 1875,
+        "level": 4,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Graphic Design"
+      },
+      {
+        "id": 1878,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Graphic Design > Letterhead Designs"
+      },
+      {
+        "id": 1877,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Graphic Design > Logos & Branding"
+      },
+      {
+        "id": 769,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Graphic Design > Store Graphics"
+      },
+      {
+        "id": 12474,
+        "level": 4,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Study Guides"
+      },
+      {
+        "id": 1874,
+        "level": 4,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates"
+      },
+      {
+        "id": 12478,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Bookkeeping Templates"
+      },
+      {
+        "id": 12479,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Chore Chart Templates"
+      },
+      {
+        "id": 12480,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Contract & Agreement Templates"
+      },
+      {
+        "id": 12481,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Event Program Templates"
+      },
+      {
+        "id": 12482,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Gift Tag Templates"
+      },
+      {
+        "id": 12483,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Greeting Card Templates"
+      },
+      {
+        "id": 12475,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Journal Templates"
+      },
+      {
+        "id": 12484,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Menu Templates"
+      },
+      {
+        "id": 12485,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Newsletter Templates"
+      },
+      {
+        "id": 12487,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Personal Finance Templates"
+      },
+      {
+        "id": 12476,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Planner Templates"
+      },
+      {
+        "id": 1876,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Résumé Templates"
+      },
+      {
+        "id": 12486,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Social Media Templates"
+      },
+      {
+        "id": 2818,
+        "level": 5,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Templates > Website Templates"
+      },
+      {
+        "id": 12471,
+        "level": 4,
+        "path": "Paper & Party Supplies > Paper > Stationery > Design & Templates > Worksheets"
+      },
+      {
+        "id": 1678,
+        "level": 2,
+        "path": "Weddings > Invitations & Paper > Templates"
+      }
+    ]
+  },
+  "search": {
+    "count_total": 46201,
+    "returned": 100,
+    "listing_type_counts": {
+      "download": 100
+    },
+    "has_views_in_search": true,
+    "fields_in_search": [
+      "created_timestamp",
+      "creation_timestamp",
+      "description",
+      "ecgt_after_sales_service_info",
+      "ecgt_commercial_guarantee_enabled",
+      "ecgt_garan_brand",
+      "ecgt_garan_guarantee_details",
+      "ecgt_garan_model",
+      "ecgt_garan_years",
+      "ecgt_other_commercial_guarantee_details",
+      "ecgt_software_update_details",
+      "ending_timestamp",
+      "featured_rank",
+      "file_data",
+      "has_variations",
+      "is_customizable",
+      "is_personalizable",
+      "is_private",
+      "is_supply",
+      "is_taxable",
+      "item_dimensions_unit",
+      "item_height",
+      "item_length",
+      "item_weight",
+      "item_weight_unit",
+      "item_width",
+      "language",
+      "last_modified_timestamp",
+      "listing_id",
+      "listing_type",
+      "materials",
+      "non_taxable",
+      "num_favorers",
+      "original_creation_timestamp",
+      "price",
+      "processing_max",
+      "processing_min",
+      "production_partners",
+      "quantity",
+      "readiness_state_id",
+      "return_policy_id",
+      "rich_description",
+      "shipping_profile_id",
+      "shop_id",
+      "shop_section_id",
+      "should_auto_renew",
+      "skus",
+      "state",
+      "state_timestamp",
+      "style",
+      "suggested_title",
+      "tags",
+      "taxonomy_id",
+      "title",
+      "updated_timestamp",
+      "url",
+      "user_id",
+      "views",
+      "when_made",
+      "who_made"
+    ],
+    "sample": [
+      {
+        "id": 1785440881,
+        "title": "Wedding Planner Template Printable",
+        "favs": 0,
+        "price": 7.5,
+        "age_days": 779,
+        "quantity": 999
+      },
+      {
+        "id": 4566910692,
+        "title": "Notion Wedding Planner Template | All-in-One Digital Wedding Planning ",
+        "favs": 0,
+        "price": 40,
+        "age_days": 45,
+        "quantity": 999
+      },
+      {
+        "id": 1845874043,
+        "title": "Hochzeitsplanung Printables, Hochzeit Checkliste, Hochzeitsplaner Vorl",
+        "favs": 1,
+        "price": 2.8,
+        "age_days": 666,
+        "quantity": 999
+      },
+      {
+        "id": 1825906069,
+        "title": "Hochzeitsplaner DEUTSCH, Canva Hochzeitsplaner, Hochzeitsplaner Templa",
+        "favs": 39,
+        "price": 12.58,
+        "age_days": 701,
+        "quantity": 943
+      },
+      {
+        "id": 4353357485,
+        "title": "Organizador de Boda en Español | Wedding Planner Digital Notion | Plan",
+        "favs": 19,
+        "price": 9.95,
+        "age_days": 426,
+        "quantity": 984
+      }
+    ]
+  },
+  "batch": {
+    "requested": 20,
+    "returned": 20,
+    "has_views": 20,
+    "has_shop": 20,
+    "has_images": 20,
+    "shop_fields": [
+      "accepts_custom_requests",
+      "announcement",
+      "create_date",
+      "created_timestamp",
+      "currency_code",
+      "digital_listing_count",
+      "digital_sale_message",
+      "has_onboarded_structured_policies",
+      "has_unstructured_policies",
+      "icon_url_fullxfull",
+      "image_url_760x100",
+      "include_dispute_form_link",
+      "is_calculated_eligible",
+      "is_direct_checkout_onboarded",
+      "is_etsy_payments_onboarded",
+      "is_opted_in_to_buyer_promise",
+      "is_shop_us_based",
+      "is_using_structured_policies",
+      "is_vacation",
+      "languages",
+      "listing_active_count",
+      "login_name",
+      "num_favorers",
+      "policy_additional",
+      "policy_has_private_receipt_info",
+      "policy_payment",
+      "policy_privacy",
+      "policy_refunds",
+      "policy_seller_info",
+      "policy_shipping",
+      "policy_update_date",
+      "policy_welcome",
+      "review_average",
+      "review_count",
+      "sale_message",
+      "shipping_from_country_iso",
+      "shop_id",
+      "shop_location_country_iso",
+      "shop_name",
+      "title",
+      "transaction_sold_count",
+      "update_date",
+      "updated_timestamp",
+      "url",
+      "user_id",
+      "vacation_autoreply",
+      "vacation_message"
+    ],
+    "sample": [
+      {
+        "id": 1785440881,
+        "views": 6,
+        "favs": 0,
+        "shop": "CustomFrameDigital",
+        "shop_sales": 445,
+        "shop_digital_listings": 60,
+        "shop_active": 60,
+        "shop_age_days": 941,
+        "img": "https://i.etsystatic.com/51112273/r/il/71af02/6298437795/il_170x135.6298437795_d24m.jpg"
+      },
+      {
+        "id": 4566910692,
+        "views": 1,
+        "favs": 0,
+        "shop": "themompreneursshop",
+        "shop_sales": 8,
+        "shop_digital_listings": 48,
+        "shop_active": 48,
+        "shop_age_days": 1065,
+        "img": "https://i.etsystatic.com/47709837/r/il/747077/5583943786/il_170x135.5583943786_9vh7.jpg"
+      },
+      {
+        "id": 1845874043,
+        "views": 37,
+        "favs": 1,
+        "shop": "StudioSoulm8",
+        "shop_sales": 447,
+        "shop_digital_listings": 81,
+        "shop_active": 189,
+        "shop_age_days": 821,
+        "img": "https://i.etsystatic.com/53684642/r/il/77e63b/6514143988/il_170x135.6514143988_dh49.jpg"
+      },
+      {
+        "id": 1825906069,
+        "views": 1194,
+        "favs": 39,
+        "shop": "Luvaio",
+        "shop_sales": 190,
+        "shop_digital_listings": 11,
+        "shop_active": 11,
+        "shop_age_days": 1041,
+        "img": "https://i.etsystatic.com/47966434/r/il/3ca62b/6429594598/il_170x135.6429594598_l3fl.jpg"
+      },
+      {
+        "id": 4353357485,
+        "views": 560,
+        "favs": 19,
+        "shop": "quevivanlosnovios",
+        "shop_sales": 17,
+        "shop_digital_listings": 3,
+        "shop_active": 3,
+        "shop_age_days": 429,
+        "img": "https://i.etsystatic.com/61486409/r/il/29005a/7162832957/il_170x135.7162832957_at9w.jpg"
+      }
+    ]
+  },
+  "reviews": {
+    "shop_id": 51112273,
+    "shop_reviews_30d": 0,
+    "shop_reviews_listing_ids": 0,
+    "listing_id": 1785440881,
+    "listing_reviews_30d": 0,
+    "review_fields": []
+  },
+  "shop_listings": {
+    "count": 60,
+    "returned": 60,
+    "digital": 60
+  },
+  "ok": true
+}
