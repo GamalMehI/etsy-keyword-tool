@@ -24,7 +24,7 @@ test('only download listings enter storage; review storage excludes buyer identi
 });
 test('persisted 4/sec gate spaces concurrent API starts; auth uses the secret',async()=>{
  resetQuota();const starts=[];
- const client=createClient({fetchImpl:async(url,opts)=>{
+ const client=createClient({sleepImpl:async()=>{},fetchImpl:async(url,opts)=>{
   assert.equal(url.origin,'https://openapi.etsy.com');assert.equal(opts.headers['x-api-key'],'test-key:test-secret');starts.push(Date.now());return new Response('{"results":[]}',{headers:{'x-limit-per-day':'5000'}});
  }});
  await Promise.all(Array.from({length:5},()=>client.get('/listings/active')));
@@ -46,6 +46,11 @@ test('429 backs off exponentially with at most three retries, safely redacts rem
  const client=createClient({sleepImpl:async ms=>waits.push(ms),fetchImpl:async()=>{count++;return new Response('do not expose remote error text',{status:429});}});
  await assert.rejects(client.get('/listings/active'),/^Error: Etsy HTTP 429$/);assert.equal(count,4);assert.ok(waits.includes(1000));assert.ok(waits.includes(2000));assert.ok(waits.includes(4000));
  resetQuota();const capped=createClient({maxCalls:1,sleepImpl:async()=>{},fetchImpl:async()=>new Response('{}')});await capped.get('/openapi-ping');await assert.rejects(capped.get('/openapi-ping'),{code:'BUDGET'});
+});
+test('a transient network failure retries within the same persisted budget',async()=>{
+ resetQuota();let attempts=0;
+ const client=createClient({sleepImpl:async()=>{},fetchImpl:async()=>{if(++attempts===1)throw new Error('Fixture timeout');return new Response('{"ok":true}');}});
+ assert.deepEqual(await client.get('/openapi-ping'),{ok:true});assert.equal(attempts,2);assert.equal(budget().used,2);
 });
 test('20,000 listings load from SQLite in under one second including cold query and sorting',()=>{
  run('DELETE FROM listings');run('DELETE FROM listing_snapshots');run('DELETE FROM reviews');

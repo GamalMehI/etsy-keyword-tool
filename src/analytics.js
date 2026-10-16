@@ -49,7 +49,7 @@ function productRows(period=30) {
     LEFT JOIN shops s ON s.shop_id=l.shop_id LEFT JOIN shop_snapshots ss ON ss.shop_id=l.shop_id AND ss.day=(SELECT MAX(day) FROM shop_snapshots WHERE shop_id=l.shop_id)
     LEFT JOIN listing_snapshots ls ON ls.listing_id=l.listing_id AND ls.day=(SELECT MAX(day) FROM listing_snapshots WHERE listing_id=l.listing_id) WHERE l.active=1`,now()-90*DAY,estimateDay,period).map(p=>{
     const age_days=Math.max(1,(now()-p.created_ts)/DAY),monthly_sales=p.sales*30/period;
-    return {...p,tags:JSON.parse(p.tags),age_days,shop_age_days:Math.max(0,(now()-p.shop_created)/DAY),monthly_sales,monthly_revenue:p.revenue==null?null:p.revenue*30/period,estimated_lifetime_sales:p.observed_reviews*p.k,velocity:p.observed_reviews*p.k/age_days,badges:badges(age_days,monthly_sales)};
+    return {...p,tags:JSON.parse(p.tags),age_days,shop_age_days:p.shop_created?Math.max(0,(now()-p.shop_created)/DAY):null,monthly_sales,monthly_revenue:p.revenue==null?null:p.revenue*30/period,estimated_lifetime_sales:p.observed_reviews*p.k,velocity:p.observed_reviews*p.k/age_days,badges:badges(age_days,monthly_sales)};
   });
 }
 let cached=null;

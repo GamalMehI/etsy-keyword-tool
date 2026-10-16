@@ -70,13 +70,13 @@ async function classifyReviewed(client,shopId) {
 }
 async function expandShops(client,maxCalls=100) {
   const start=client.calls;
-  const shops=all(`SELECT s.shop_id FROM shops s JOIN listings l ON l.shop_id=s.shop_id JOIN estimates e ON e.listing_id=l.listing_id AND e.day=(SELECT MAX(day) FROM estimates WHERE period=30) AND e.period=30 WHERE s.last_expanded<? GROUP BY s.shop_id HAVING SUM(e.sales)>100 ORDER BY SUM(e.sales) DESC`,now()-7*86400);
+  const shops=all(`SELECT s.shop_id FROM shops s JOIN listings l ON l.shop_id=s.shop_id JOIN estimates e ON e.listing_id=l.listing_id AND e.day=(SELECT MAX(day) FROM estimates WHERE period=30) AND e.period=30 WHERE l.active=1 AND s.last_expanded<? GROUP BY s.shop_id HAVING SUM(e.sales)>100 ORDER BY SUM(e.sales) DESC`,now()-7*86400);
   for(const shop of shops){
     for(let offset=0;offset<=9900;offset+=100) {
       if(client.calls-start>=maxCalls)return;
       const r=await client.get(`/shops/${shop.shop_id}/listings/active`,{limit:100,offset,currency:'USD'});
       transaction(()=>{for(const l of r.results||[])saveListing(l,'shop');});
-      if(offset+100>=r.count||(r.results||[]).length<100){run('UPDATE shops SET last_expanded=? WHERE shop_id=?',now(),shop.shop_id);break;}
+      if(offset===9900||offset+100>=r.count||(r.results||[]).length<100){run('UPDATE shops SET last_expanded=? WHERE shop_id=?',now(),shop.shop_id);break;}
     }
   }
 }

@@ -4,7 +4,7 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;',
 const num = (n,d=0) => n == null ? 'Indisponible' : Number(n).toLocaleString('fr-FR',{maximumFractionDigits:d});
 const usd = n => n == null ? 'N/D' : num(n,n<100?2:0)+' $';
 const est = '<span class="est">est.</span>';
-const age = n => n<60?num(n)+' j':n<730?num(n/30)+' mois':num(n/365,1)+' ans';
+const age = n => n==null||!Number.isFinite(n)?'N/D':n<60?num(n)+' j':n<730?num(n/30)+' mois':num(n/365,1)+' ans';
 const dateTime = t => t ? new Date(t*1000).toLocaleString('fr-FR',{timeZone:'Africa/Casablanca',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'Aucune';
 const state = {screen:'hot',period:30,filters:{niche:'',min:'',max:'',age:'',confidence:'1',q:'',language:'en'},sort:'monthly_revenue',dir:'desc',offset:0,report:null,stats:null,seeds:null,seedDraft:null,analyzing:false};
 let requestId = 0;

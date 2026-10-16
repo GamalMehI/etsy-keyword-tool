@@ -22,7 +22,7 @@ async function listingReviews(client,l) {
 async function analyze(q) {
   q=norm(q);if(!q||q.length>160||hasTrademark(q))throw Object.assign(new Error('Mot-clé vide, trop long ou bloqué par la liste de marques'),{status:400});
   const cache=one('SELECT report FROM keyword_reports WHERE keyword=? AND day=?',q,day());
-  if(cache)return {...JSON.parse(cache.report),cached:true,calls:0};
+  if(cache){const report=JSON.parse(cache.report);if(report.version===1)return {...report,cached:true,calls:0};}
   if(inflight.has(q))return inflight.get(q);
   // Serialize fresh analyses to make interactive budget and response time predictable.
   if(inflight.size)throw Object.assign(new Error('Une analyse est déjà en cours. Réessayer dans un instant.'),{status:409});
@@ -61,7 +61,7 @@ async function build(q) {
   const leaders=top.slice(0,2).map(p=>p.listing_id);
   const complaints=leaders.flatMap(id=>all('SELECT rating,text,listing_id,created_ts FROM reviews WHERE listing_id=? AND rating<=3 AND created_ts>=? ORDER BY created_ts DESC LIMIT 5',id,now()-90*86400)).slice(0,5);
   const prices=top.map(p=>p.price_usd).filter(p=>p!=null);
-  const report={keyword:q,...scores,total_count:pool?.total||0,digital_share:pool?.digital_share||0,priced:prices.length,median_price:median(prices),price_range:prices.length?[Math.min(...prices),Math.max(...prices)]:[],median_age:median(top.map(p=>p.age_days)),google,subkeywords,products:top,complaints,calls:client.calls,warning,cached:false,at:now(),review_metric:'Avis observés sur 90 jours, pas le total à vie par produit'};
+  const report={version:1,keyword:q,...scores,total_count:pool?.total||0,digital_share:pool?.digital_share||0,priced:prices.length,median_price:median(prices),price_range:prices.length?[Math.min(...prices),Math.max(...prices)]:[],median_age:median(top.map(p=>p.age_days)),google,subkeywords,products:top,complaints,calls:client.calls,warning,cached:false,at:now(),review_metric:'Avis observés sur 90 jours, pas le total à vie par produit'};
   run('INSERT OR REPLACE INTO keyword_reports VALUES(?,?,?)',q,day(),JSON.stringify(report));return report;
 }
 module.exports={analyze,listingReviews};

@@ -46,11 +46,14 @@ function createClient({ background=false, maxCalls=Infinity, deadline=Infinity, 
       }
       let r;
       try { r=await fetchImpl(url,{ headers:{ 'x-api-key':`${ETSY_KEY}:${ETSY_SECRET}` }, signal:AbortSignal.timeout(Math.min(20000,Math.max(1,deadline-Date.now()))) }); }
-      catch { throw new Error('Etsy indisponible ou délai dépassé'); }
+      catch {
+        if(attempt<3 && Date.now()+1000*2**attempt<deadline){await sleepImpl(1000*2**attempt);continue;}
+        throw new Error('Etsy indisponible ou délai dépassé');
+      }
       recordHeaders(r.headers);
       run('UPDATE api_events SET status=? WHERE id=?',r.status,event);
       lastResponse={path:pathname,status:r.status,limits:Object.fromEntries([...r.headers].filter(([k])=>k.startsWith('x-limit')||k.startsWith('x-remaining')))};
-      if (r.status===429 && attempt<3) { const retry=Number(r.headers.get('retry-after')) || 0; await sleepImpl(Math.min(15000,Math.max(retry*1000,1000*2**attempt))); continue; }
+      if ((r.status===429 || r.status>=500) && attempt<3) { const retry=Number(r.headers.get('retry-after')) || 0; await sleepImpl(Math.min(15000,Math.max(retry*1000,1000*2**attempt))); continue; }
       // Never include remote bodies or headers in errors: credentials cannot leak via a remote echo.
       if (!r.ok) { const e=new Error(`Etsy HTTP ${r.status}`); e.status=r.status; throw e; }
       return r.json();

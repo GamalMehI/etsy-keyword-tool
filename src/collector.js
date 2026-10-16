@@ -52,7 +52,7 @@ async function collect({bootstrap=false}={}) {
         progress('A · Rafraîchir les produits');
         await batchRefresh(client,all('SELECT listing_id FROM listings WHERE active=1 ORDER BY last_seen').map(l=>l.listing_id));
         progress('B · Nouveaux avis');
-        for(const s of all(`SELECT s.* FROM shops s LEFT JOIN shop_snapshots ss ON ss.shop_id=s.shop_id AND ss.day=? WHERE s.last_review_ts>0 AND s.last_review_ts<? ORDER BY ss.transaction_sold_count DESC`,day(),now()-3600)){
+        for(const s of all(`SELECT s.* FROM shops s LEFT JOIN shop_snapshots ss ON ss.shop_id=s.shop_id AND ss.day=? LEFT JOIN (SELECT l.shop_id,SUM(e.sales) AS monthly FROM listings l JOIN estimates e ON e.listing_id=l.listing_id AND e.period=30 AND e.day=(SELECT MAX(day) FROM estimates WHERE period=30) GROUP BY l.shop_id) est ON est.shop_id=s.shop_id WHERE s.last_review_ts>0 AND s.last_review_ts<? ORDER BY COALESCE(est.monthly,0) DESC,ss.transaction_sold_count DESC`,day(),now()-3600)){
           if(client.calls>=2200)break;progress('B · Nouveaux avis',s.shop_name);await shopReviews(client,s);
         }
       }

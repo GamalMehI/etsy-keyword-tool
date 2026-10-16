@@ -17,7 +17,7 @@ function scoreProducts(products,total=0,volume=null) {
   for (const p of top) shops.set(p.shop_id,(shops.get(p.shop_id)||0)+(p.monthly_revenue||0));
   const revenue=sum([...shops.values()]), top3=revenue?sum([...shops.values()].sort((a,b)=>b-a).slice(0,3))/revenue:0;
   const youngListings=top.filter(p=>p.age_days<365&&p.monthly_sales>=10).length;
-  const youngShops=new Set(top.filter(p=>p.shop_age_days<365).map(p=>p.shop_id)).size;
+  const youngShops=new Set(top.filter(p=>p.shop_age_days!=null&&p.shop_age_days<365).map(p=>p.shop_id)).size;
   const demand=demandScore(sum(top.map(p=>p.monthly_sales||0)),top.filter(p=>p.monthly_sales>=30).length,volume);
   const competition=competitionScore(total,top3,top.length?top.filter(p=>p.shop_sales>=5000).length/top.length:0,median(top.slice(0,24).map(p=>p.review_count||0)));
   const open_door=openDoorScore(youngListings,youngShops),opportunity=opportunityScore(demand,competition,open_door);

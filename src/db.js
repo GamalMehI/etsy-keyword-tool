@@ -63,7 +63,7 @@ function saveListing(l, via='batch', date=day()) {
   return true;
 }
 function saveShop(s,date=day()) {
-  run(`INSERT INTO shops(shop_id,shop_name,url,icon_url,created_ts,first_seen,last_seen) VALUES(?,?,?,?,?,?,?) ON CONFLICT(shop_id) DO UPDATE SET shop_name=excluded.shop_name,url=excluded.url,icon_url=excluded.icon_url,created_ts=excluded.created_ts,last_seen=excluded.last_seen`,s.shop_id,s.shop_name || '',s.url || '',s.icon_url_fullxfull || '',s.create_date || s.created_timestamp || now(),now(),now());
+  run(`INSERT INTO shops(shop_id,shop_name,url,icon_url,created_ts,first_seen,last_seen) VALUES(?,?,?,?,?,?,?) ON CONFLICT(shop_id) DO UPDATE SET shop_name=excluded.shop_name,url=excluded.url,icon_url=excluded.icon_url,created_ts=excluded.created_ts,last_seen=excluded.last_seen`,s.shop_id,s.shop_name || '',s.url || '',s.icon_url_fullxfull || '',s.create_date || s.created_timestamp || null,now(),now());
   run('INSERT OR REPLACE INTO shop_snapshots VALUES(?,?,?,?,?,?,?,?)',s.shop_id,date,s.transaction_sold_count ?? null,s.review_count ?? null,s.listing_active_count ?? null,s.digital_listing_count ?? null,s.num_favorers || 0,s.review_average ?? null);
 }
 function saveReviews(rows,shopId) {
