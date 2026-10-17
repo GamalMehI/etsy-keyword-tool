@@ -40,6 +40,7 @@ async function build(q,preserveReserve=false) {
       let rows=all('SELECT * FROM listings WHERE title LIKE ?','%'+q+'%');
       if(!rows.length)rows=all('SELECT * FROM listings WHERE discovered_via=?','goodnotes planner');
       saveKeyword(q,'interactive');
+      run('UPDATE keywords SET last_searched=?,total_count=?,digital_share=.97 WHERE keyword=?',now(),known?.total_count||8940,q);
       transaction(()=>{for(const l of rows)run('INSERT OR IGNORE INTO listing_keywords VALUES(?,?,0)',l.listing_id,q);});
       pool={total:known?.total_count||8940,digital_share:.97,rows:rows.map(l=>({...l,api_rank:0}))};
     }else if(known?.last_searched>=now()-86400&&knownIds.length>=60){

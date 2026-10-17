@@ -52,6 +52,18 @@ test('sub-niches require eight listings and five shops, including exact boundari
  assert.ok(out.subniches.length>=2);assert.ok(out.subniches.every(s=>s.listings>=8&&s.shops>=5));
  assert.ok(out.hidden_subniches>=0);assert.ok(out.subniches.every(s=>s.products.length<=3));
 });
+test('word-order membership combines before thresholds and cached helper candidates need no requests',()=>{
+ const ps=Array.from({length:8},(_,i)=>product(i,{title:'Junk journal',tags:[i<4?'vintage ephemera':'ephemera vintage','antique botanical framed victorian collage']}));
+ const r=e.discoverSubniches(ps,'junk journal',{suggestions:['antique botanical framed victorian collage']});
+ assert.ok(r.subniches.some(n=>n.listings===8&&n.aliases.includes('vintage ephemera')));
+ assert.ok(r.subniches.some(n=>n.aliases.includes('antique botanical framed victorian collage')));
+});
+test('sub-niche scoring reuses known API competition totals when available',()=>{
+ const ps=Array.from({length:8},(_,i)=>product(i,{title:'Junk Journal',tags:['vintage ephemera']}));
+ const unknown=e.discoverSubniches(ps,'junk journal').subniches[0];
+ const known=e.discoverSubniches(ps,'junk journal',{keywords:[{keyword:'vintage ephemera',total_count:500000}]}).subniches[0];
+ assert.ok(known.competition>unknown.competition);assert.equal(known.competition_scope,'API : tous formats');
+});
 test('shop concentration aggregates whole shops and unknown revenue stays unknown',()=>{
  const ps=[product(1,{shop_id:1,monthly_revenue:300}),product(2,{shop_id:1,monthly_revenue:200}),product(3,{monthly_revenue:200}),product(4,{monthly_revenue:100}),product(5,{monthly_revenue:200}),product(6,{monthly_revenue:null,price_usd:null})];
  assert.equal(e.top3Share(ps),.9);assert.equal(e.top3Share([product(1,{monthly_revenue:null})]),null);

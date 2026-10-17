@@ -17,6 +17,8 @@ test('mock seeds 30 days of digital snapshots and a complete zero-network dashbo
   assert.ok(analytics.niches(30).length>=12);
   const explored=require('../src/explore').explore(new URLSearchParams({niche:'digital planner'}));assert.ok(explored.subniches.length>=5);assert.ok(explored.products.length>0);
   for(const s of explored.subniches)assert.ok(s.listings>=8&&s.shops>=5);
+  assert.equal((await require('../src/explore').fetchNiche('digital planner')).calls,0);
+  assert.equal(require('../src/explore').explore(new URLSearchParams({niche:'digital planner'})).coverage.needs_fetch,false);
   const report=await require('../src/keyword').analyze('goodnotes planner');assert.equal(report.calls,0);assert.equal(report.google,null);assert.ok(report.products.length>0);
   assert.deepEqual(new Set(all('SELECT DISTINCT confidence FROM estimates').map(r=>r.confidence)),new Set(['Basse','Moyenne','Haute']));
  }finally{global.fetch=previous;}

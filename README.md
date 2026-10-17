@@ -21,9 +21,20 @@ Open [the local dashboard](http://localhost:3456). The server binds to `127.0.0.
 - **Produits tendance**: 7/30/90-day estimates normalized to sales and gross revenue per month; niche, USD price, age, confidence, language and text filters; sortable columns and pagination. English listings are shown by default. Product details show observed daily reviews × K, observed favorites, shop totals, and tags that open keyword analysis.
 - **Analyse de mot-clé**: a pool of up to 500 search results, pre-ranked by favorites and views; up to 150 detailed products, reviews for the best 60, then our top 48 by estimated sales. Four scores and a verdict, pricing, digital share, suggestions, optional Google volume and low-star reviews. This is our ranking of an API sample, not Etsy’s first page.
 - **Niches**: database-only rankings and weekly review-based revenue sparklines. Click a niche to filter its products. Products can belong to multiple niches, so niche revenues overlap.
+- **Explorer une niche**: ranked products and sub-niches from the local database, with breadcrumbs for deeper exploration, observed review counts, product explanations and quality-gap reviews. Open it directly or use **Explorer** from Niches or a keyword report. English is the default; select 7/30/90 days, revenue/sales/velocity/trend/new risers, price, age and confidence.
 - **Collecte**: persisted API usage and remaining budget, protected interactive reserve, collection progress/outcome, history maturity, editable seeds and schedule.
 
 All estimated sales, revenue, growth, concentration and success figures are labeled `est.`. Confidence describes evidence coverage, not statistical certainty. Shop lifetime sales, favorites and prices are observed API values.
+
+## Explorer une niche
+
+Type a niche such as `junk journal` or `digital planner`. Explorer first reads the tracked database; opening, filtering and drilling spend **zero API calls**. Products must be active digital downloads, pass the existing trademark filter, and match an exact keyword link or a whole phrase in the title/tags (case-insensitive, singular/plural tolerant). Each drill stays inside its parent. Sub-niches come from 2–4 word title/tag phrases, containing tracked keywords, and **already cached** Google/Semrush suggestions. Helpers refresh only through an explicit API enrichment click. Edit the format-only exclusion list in `src/explore.js`.
+
+Singular/plural and word-order variants merge before the minimum of **8 products from 5 shops** is applied. Candidates with at least 80% Jaccard listing overlap are merged under the higher-revenue name; narrower markets with less overlap remain distinct. The top 30 rank by the existing opportunity score, then estimated monthly revenue. Counts hidden by the thresholds are shown separately. Preview products and drill-down use the same merged membership. Product price/age/confidence filters affect the product table; summary and sub-niche comparisons use the whole niche in the selected language.
+
+The coverage line shows tracked products and their oldest update date. If fewer than 60 are tracked or the search is older than 24 hours, **Compléter avec l’API (≈ 60 à 110 appels)** runs the existing analyzer and refreshes the database. Each sub-niche also has an enrichment button. Explorer requires 110 available calls **above the 800-call reserve**, and enforces that floor on every request/retry. Cached daily reports can return without calls. The existing keyword-analysis screen retains its interactive reserve allowance and single-flight behavior. Actual enrichment cost depends on fresh data already available; it may be below 60 calls or stop with a partial-data warning.
+
+Scores describe the observed sample; unknown competition totals use the tracked sample and can understate market competition. Revenue, concentration and parent shares cover confirmed USD prices only. Overlapping sub-niches do not add up to a partition. Velocity is an observed-history sales estimate, and absent review history is not evidence of no sales. All estimated figures keep their `est.` labels.
 
 ## Daily collection
 

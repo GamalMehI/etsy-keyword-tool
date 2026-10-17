@@ -50,8 +50,7 @@ function isCandidate(phrase,parent='') {
   const ws=words(phrase),key=ws.join(' ');
   if(ws.length<2||ws.length>12||key.length>160||hasTrademark(key)||STOP.has(ws[0])||STOP.has(ws.at(-1)))return false;
   if(canonicalKey(phrase)===canonicalKey(parent))return false;
-  const pw=words(parent);
-  return !GENERIC_KEYS.has(key)&&!(pw.length>1&&ws.at(-1)===pw[0]);
+  return !GENERIC_KEYS.has(key)&&!['junk','digital'].includes(ws.at(-1));
 }
 function extractPhrases(product,parent='',validity=new Map()) {
   const found=new Set();
@@ -125,11 +124,11 @@ function discoverSubniches(products,parent,{keywords=[],suggestions=[],links=new
   };
   // Inverted phrase index: scan the parent's products once, rather than every candidate × every listing.
   for(const p of products)for(const phrase of extractPhrases(p,parent,validity))add(phrase,p.listing_id);
-  for(const k of [...keywords,...suggestions]){
+  for(const c of candidates.values())for(const id of links.get(c.niche)||[])if(byId.has(id))c.ids.add(id);
+  for(const k of [...keywords.filter(k=>containsWords(words(typeof k==='string'?k:k.keyword),words(parent))),...suggestions]){
     const phrase=typeof k==='string'?k:k.keyword;
     if(!isCandidate(phrase,parent))continue;
     // Existing containing keywords and cached helper suggestions can extend past four words.
-    if(!containsWords(words(phrase),words(parent)))continue;
     const ids=links.get(phrase)||new Set(),matcher=phraseMatcher(phrase);
     for(const p of products)if(ids.has(p.listing_id)||matcher.test(searchableText(p)))add(phrase,p.listing_id);
   }
@@ -137,9 +136,10 @@ function discoverSubniches(products,parent,{keywords=[],suggestions=[],links=new
   const merged=mergeCandidates(raw,{mergeOverlap:false});
   for(const c of merged)c.monthly_revenue=[...c.ids].reduce((s,id)=>s+(byId.get(id)?.monthly_revenue||0),0);
   const qualified=merged.filter(c=>passesThreshold([...c.ids].map(id=>byId.get(id)))),eligible=mergeCandidates(qualified);
+  const counts=new Map();for(const k of keywords)if(typeof k!=='string')counts.set(phraseKey(k.keyword),Math.max(counts.get(phraseKey(k.keyword))||0,k.total_count||0));
   const parentRevenue=products.some(p=>p.monthly_revenue!=null)?sum(products,'monthly_revenue'):null;
   const rows=eligible.map(c=>{
-    const ps=[...c.ids].map(id=>byId.get(id)),m=metrics(ps,period,parentRevenue);
+    const ps=[...c.ids].map(id=>byId.get(id)),m=metrics(ps,period,parentRevenue,counts.get(phraseKey(c.niche))||0);
     return {niche:c.niche,aliases:c.aliases,listing_ids:[...c.ids],...m,products:rankProducts(ps).slice(0,3)};
   }).sort((a,b)=>b.opportunity-a.opportunity||(b.monthly_revenue||0)-(a.monthly_revenue||0)||a.niche.localeCompare(b.niche));
   return {subniches:rows.slice(0,30),hidden_subniches:merged.length-qualified.length,more_subniches:Math.max(0,rows.length-30),candidates:merged.length};
@@ -197,5 +197,8 @@ function explore(params) {
   return {...result,rows:undefined,coverage:coverage(result.rows,index.keywords.find(k=>k.keyword===niche),b),products:rows.slice(offset,offset+limit),total:rows.length,offset,limit,
     subniches:result.subniches.map(({listing_ids,...s})=>({...s,coverage:coverage(s.products,index.keywords.find(k=>k.keyword===s.niche),b,s.listings),tracked:s.listings}))};
 }
-async function fetchNiche(niche) { return require('./keyword').analyze(niche,{preserveReserve:true}); }
+async function fetchNiche(niche) {
+  if(!words(niche).length)throw Object.assign(new Error('Saisir une niche valide.'),{status:400});
+  return require('./keyword').analyze(niche,{preserveReserve:true});
+}
 module.exports={warmExplore,GENERIC_PHRASES,phraseMatcher,words,phraseKey,canonicalKey,containsWords,matchesPhrase,isCandidate,extractPhrases,top3Share,passesThreshold,overlap,mergeCandidates,whyWins,filterProducts,rankProducts,metrics,discoverSubniches,unescapeHtml,explore,fetchNiche};
