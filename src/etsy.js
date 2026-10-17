@@ -3,10 +3,10 @@ const { run, one, transaction, budget } = require('./db');
 const { sleep, day } = require('./util');
 class BudgetError extends Error { constructor(message='Réserve API atteinte') { super(message); this.code='BUDGET'; } }
 // A persisted gate coordinates CLI + HTTP workers, including retries. No burst tokens.
-function reserveCall(background) {
+function reserveCall(background,minRemaining=0) {
   return transaction(() => {
     const b=budget();
-    if (b.remaining <= (background ? RESERVE : 0)) throw new BudgetError();
+    if (b.remaining <= Math.max(minRemaining,background ? RESERVE : 0)) throw new BudgetError();
     const t=Date.now(), slot=Math.max(t,one('SELECT next_at FROM api_gate WHERE id=1').next_at);
     run('UPDATE api_gate SET next_at=? WHERE id=1',slot+260);
     run(`INSERT INTO api_calls(day,used,remaining_reported,last_headers) VALUES(?,1,NULL,'{}') ON CONFLICT(day) DO UPDATE SET used=used+1,remaining_reported=CASE WHEN remaining_reported IS NULL THEN NULL ELSE MAX(0,remaining_reported-1) END`,day());
@@ -19,7 +19,7 @@ function recordHeaders(headers) {
   const raw=h['x-remaining-today'], remain=raw != null && Number.isFinite(Number(raw)) ? Number(raw) : null;
   transaction(() => run(`UPDATE api_calls SET remaining_reported=CASE WHEN ? IS NULL THEN remaining_reported WHEN remaining_reported IS NULL THEN ? ELSE MIN(remaining_reported,?) END,last_headers=? WHERE day=?`,remain,remain,remain,JSON.stringify(h),day()));
 }
-function createClient({ background=false, maxCalls=Infinity, deadline=Infinity, fetchImpl=fetch, sleepImpl=sleep }={}) {
+function createClient({ background=false, minRemaining=0, maxCalls=Infinity, deadline=Infinity, fetchImpl=fetch, sleepImpl=sleep }={}) {
   let calls=0,lastResponse=null;
   return { get calls() { return calls; }, get lastResponse() { return lastResponse; }, async get(pathname,params={}) {
     if (!/^\/(?:listings|shops|buyer-taxonomy|openapi-ping)(?:\/|$)/.test(pathname) || pathname.includes('..')) throw new Error('Endpoint Etsy interdit');
@@ -29,7 +29,7 @@ function createClient({ background=false, maxCalls=Infinity, deadline=Infinity, 
     for (const [k,v] of Object.entries(params)) url.searchParams.set(k,Array.isArray(v)?v.join(','):v);
     for (let attempt=0;attempt<4;attempt++) {
       if (calls>=maxCalls || Date.now()>=deadline) throw new BudgetError('Limite de cette opération atteinte');
-      const wait=reserveCall(background); calls++;
+      const wait=reserveCall(background,minRemaining); calls++;
       await sleepImpl(wait);
       if (Date.now()>=deadline) throw new BudgetError('Délai de cette opération atteint');
       // Recheck at dispatch as well: a suspended event loop must never release a burst.

@@ -44,10 +44,10 @@ function recompute() {
 function productRows(period=30) {
   const estimateDay=one('SELECT MAX(day) AS day FROM estimates WHERE period=?',period)?.day||day();
   return all(`SELECT l.*,s.shop_name,s.created_ts AS shop_created,ss.transaction_sold_count AS shop_sales,ss.digital_listing_count,ss.listing_active_count,ss.review_average,ls.num_favorers AS favorites,ls.views,e.sales,e.revenue,e.method,e.confidence,e.trend,e.k,e.coverage_days,e.previous_sales,
-    (SELECT COUNT(*) FROM reviews r WHERE r.listing_id=l.listing_id AND r.created_ts>=?) AS review_count, (SELECT COUNT(*) FROM reviews r WHERE r.listing_id=l.listing_id) AS observed_reviews
+    (SELECT COUNT(*) FROM reviews r WHERE r.listing_id=l.listing_id AND r.created_ts>=?) AS review_count, (SELECT COUNT(*) FROM reviews r WHERE r.listing_id=l.listing_id AND r.created_ts>=?) AS reviews_in_period, (SELECT COUNT(*) FROM reviews r WHERE r.listing_id=l.listing_id) AS observed_reviews
     FROM listings l JOIN estimates e ON e.listing_id=l.listing_id AND e.day=? AND e.period=?
     LEFT JOIN shops s ON s.shop_id=l.shop_id LEFT JOIN shop_snapshots ss ON ss.shop_id=l.shop_id AND ss.day=(SELECT MAX(day) FROM shop_snapshots WHERE shop_id=l.shop_id)
-    LEFT JOIN listing_snapshots ls ON ls.listing_id=l.listing_id AND ls.day=(SELECT MAX(day) FROM listing_snapshots WHERE listing_id=l.listing_id) WHERE l.active=1`,now()-90*DAY,estimateDay,period).map(p=>{
+    LEFT JOIN listing_snapshots ls ON ls.listing_id=l.listing_id AND ls.day=(SELECT MAX(day) FROM listing_snapshots WHERE listing_id=l.listing_id) WHERE l.active=1`,now()-90*DAY,now()-period*DAY,estimateDay,period).map(p=>{
     const age_days=Math.max(1,(now()-p.created_ts)/DAY),monthly_sales=p.sales*30/period;
     return {...p,tags:JSON.parse(p.tags),age_days,shop_age_days:p.shop_created?Math.max(0,(now()-p.shop_created)/DAY):null,monthly_sales,monthly_revenue:p.revenue==null?null:p.revenue*30/period,estimated_lifetime_sales:p.observed_reviews*p.k,velocity:p.observed_reviews*p.k/age_days,badges:badges(age_days,monthly_sales)};
   });
@@ -55,7 +55,8 @@ function productRows(period=30) {
 let cached=null;
 function invalidate() { cached=null; }
 function dataset(period=30) {
-  if(!cached||cached.date!==day()||Date.now()-cached.at>30000)cached={date:day(),at:Date.now(),periods:new Map()};
+  if(!cached||cached.date!==day())cached={date:day(),version:one('PRAGMA data_version').data_version,checked:Date.now(),periods:new Map()};
+  if(Date.now()-cached.checked>30000){const version=one('PRAGMA data_version').data_version;if(version!==cached.version)cached={...cached,version,periods:new Map()};cached.checked=Date.now();}
   if(!cached.periods.has(period))cached.periods.set(period,productRows(period));
   return cached.periods.get(period);
 }

@@ -1,5 +1,5 @@
-const { MOCK }=require('./config');
-const { all,one,run,saveListing,saveReviews,saveKeyword,transaction }=require('./db');
+const { MOCK,RESERVE }=require('./config');
+const { all,one,run,saveListing,saveReviews,saveKeyword,transaction,budget }=require('./db');
 const { now,day,norm,median }=require('./util');
 const { createClient }=require('./etsy');
 const { searchPool,batchRefresh,linkListing }=require('./discovery');
@@ -19,17 +19,18 @@ async function listingReviews(client,l) {
     if(offset+100>=r.count||(r.results||[]).length<100){run('INSERT OR REPLACE INTO review_coverage VALUES(?,?,?)',l.listing_id,since,t);return;}
   }
 }
-async function analyze(q) {
+async function analyze(q,{preserveReserve=false}={}) {
   q=norm(q);if(!q||q.length>160||hasTrademark(q))throw Object.assign(new Error('Mot-clé vide, trop long ou bloqué par la liste de marques'),{status:400});
   const cache=one('SELECT report FROM keyword_reports WHERE keyword=? AND day=?',q,day());
   if(cache){const report=JSON.parse(cache.report);if(report.version===1)return {...report,cached:true,calls:0};}
   if(inflight.has(q))return inflight.get(q);
   // Serialize fresh analyses to make interactive budget and response time predictable.
   if(inflight.size)throw Object.assign(new Error('Une analyse est déjà en cours. Réessayer dans un instant.'),{status:409});
-  const work=build(q).finally(()=>inflight.delete(q));inflight.set(q,work);return work;
+  if(preserveReserve&&!MOCK&&budget().remaining<RESERVE+110)throw Object.assign(new Error(`Collecte refusée : ${budget().remaining} appels restants. Il faut 110 appels disponibles au-delà de la réserve de ${RESERVE}. Réessayez après le renouvellement du quota.`),{status:429});
+  const work=build(q,preserveReserve).finally(()=>inflight.delete(q));inflight.set(q,work);return work;
 }
-async function build(q) {
-  const client=createClient({maxCalls:110,deadline:Date.now()+79000});
+async function build(q,preserveReserve=false) {
+  const client=createClient({minRemaining:preserveReserve?RESERVE:0,maxCalls:110,deadline:Date.now()+79000});
   const helperWork=MOCK?Promise.resolve([null,[],all('SELECT keyword FROM keywords WHERE active=1 LIMIT 8')]):Promise.all([semrushOverview(q),semrushRelated(q,30),expandKeyword(q,false)]);
   let pool,warning=null;
   const known=one('SELECT * FROM keywords WHERE keyword=?',q);

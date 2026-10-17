@@ -7,6 +7,7 @@ const { collect }=require('./collector');
 const { analyze }=require('./keyword');
 const { seeds,seedFile,syncSeeds }=require('./discovery');
 const { hasTrademark }=require('./trademark');
+const { explore,fetchNiche }=require('./explore');
 function stats() {
  const hist=one('SELECT COUNT(DISTINCT day) AS days,MIN(day) AS first,MAX(day) AS last FROM listing_snapshots');
  const days=hist.first?Math.floor((Date.now()-Date.parse(hist.first))/86400000):0;
@@ -20,6 +21,7 @@ async function route(req,url) {
  const p=url.pathname;
  if(req.method==='GET'){
   if(p==='/api/status'||p==='/api/collection')return stats();
+  if(p==='/api/explore')return explore(url.searchParams);
   if(p==='/api/products')return products(url.searchParams);
   if(/^\/api\/products\/\d+$/.test(p)){const period=Number(url.searchParams.get('period')||30);const r=detail(Number(p.split('/').at(-1)),[7,30,90].includes(period)?period:30);if(!r)throw Object.assign(new Error('Produit introuvable'),{status:404});return r;}
   if(p==='/api/niches'){const period=Number(url.searchParams.get('period')||30);return niches([7,30,90].includes(period)?period:30);}
@@ -27,6 +29,7 @@ async function route(req,url) {
   if(p==='/api/suggest'){const q=norm(url.searchParams.get('q'));return {rows:all('SELECT keyword FROM keywords WHERE active=1 AND keyword LIKE ? LIMIT 30','%'+q+'%')};}
  }
  if(req.method==='POST'){
+  if(p==='/api/explore/fetch')return fetchNiche((await body(req)).niche);
   if(p==='/api/keyword')return analyze((await body(req)).keyword);
   if(p==='/api/collect'){
     const value=await body(req);

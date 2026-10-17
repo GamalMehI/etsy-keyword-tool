@@ -30,7 +30,7 @@ function createServer(){return http.createServer(async(req,res)=>{
  }catch(e){res.writeHead(e.status|| (e.code==='BUDGET'?429:500),{'content-type':'application/json; charset=utf-8'});res.end(JSON.stringify({error:e.message}));}
 });}
 if(require.main===module){
- if(MOCK)require('./src/mock').seedMock();recompute();
+ if(MOCK)require('./src/mock').seedMock();recompute();require('./src/explore').warmExplore();
  const server=createServer();server.listen(PORT,'127.0.0.1',()=>console.log(`Etsy Digital Niche Finder : http://localhost:${PORT}${MOCK?' (données d’exemple)':''}`));
  schedule();
 }
